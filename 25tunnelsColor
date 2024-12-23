@@ -1,0 +1,23 @@
+Female connector:
+13: 黑，咖啡，红，橙，黄，绿，蓝，紫，灰，白，粉，浅绿，黑白
+12: 咖啡白，红白，橙白，绿白，蓝白，紫白，红黑，橙黑，黄黑，绿黑，灰黑，粉黑
+
+AlphaOmega Dig.Inp port:
+13: 1, 3, 5, 7, 9, 11, 13, 15, Strobe, GND, Ready, GND, GND
+12: 2, 4, 6, 8, 10, 12, 14, 16, GND, GND, GND, GND
+
+Zeus Digital Input port:
+13: GND  GND  GND GND DS-A 8   7   6   5   4   3   2    1
+12: GND GND GND GND 16   15 14 13 12 11 10 9
+
+labjack:
+13: FIO0, FIO2, FIO4, FIO6, URGND, URGND, URGND, URGND, FIO7, CRGND, CRGND, DRGND, DRGND
+12: FIO1, FIO3, FIO5, DLSGND, ULSGND, DLSGND, ULSGND, DLSGND, CLGND, CLGND, DLGND, DLGND
+
+URGND: Up Right GND
+CRGND: Center Right GND
+DRGND: Down Right GND
+DLSGND: Down Left SGND
+ULSGND: Up Left SGND
+CLGND: Center Left GND
+DLGND: Down Left GND
