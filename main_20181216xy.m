@@ -1,19 +1,6 @@
 global datapath rewd double_line current_round;
 
 cur_path = cd;
-diary off;
-
-%%
-% move myDiaryFile to today's filefolder
-if ~exist(sprintf('%s/myDiaryFile',datapath), 'file')
-    % diary off;
-    movefile("myDiaryFile", datapath)
-    % newDiaryFilePath = fullfile(datapath, "myDiaryFile");
-    % diary(newDiaryFilePath)
-else
-    error('myDiaryFile is already in %s',datapath)
-end
-
 
 %%
 %init
@@ -40,7 +27,7 @@ fprintf("map version is %s\n", mapname)
 
 
 %% modified by zzw 20161015
-result = 0;
+result = 0; inum = 1;
 % current_round & used_trial
 path_ = char(datapath);
 if inum > 1
@@ -67,7 +54,6 @@ reward_trial = 0;
 EndReward = 0;
 lazy = 0;
 lazyTrial = 0;
-
 
 %% print correct rate, ljs
 win=0;totalValid=0;totalAll=0;
@@ -107,8 +93,6 @@ while result >=0% quit session when result<0
     rewd.rewardWin = 0.1;
     rewd.rewardX = 1;
     
-    
-    
     endDots = 0;%trial end when no dots on the map
     initTrialDG(mapname, result);
     
@@ -121,7 +105,6 @@ while result >=0% quit session when result<0
     %fyh-delete eyelink calibration
     % if cal
 
-    
     totalAll = totalAll + 1; 
     totalValid = totalValid + 1;
     
@@ -215,28 +198,8 @@ while result >=0% quit session when result<0
     end
 
 end
- 
-%%
-%fyh-delete eyelink file
 
-%% how much water and fruit
-if result == -2
-    fprintf("monkey was lazy too many trials, end the experiment or restart the game.\n")
-    fprintf("%s\n", datestr(now))
-end
-answer = input('How much water received: ', 's');
-if isempty(answer)
-    answer = '200';
-end
-fprintf('Monkey drinks %sml water in total\n', answer);
-fprintf('%.2fml water per second\n', str2double(answer)/reward_total*60);
-answer = input('How much fruit received: ', 's');
-if isempty(answer)
-    answer = '100';
-end
-fprintf('Monkey eats %sg fruit\n', answer);
 
-%% fyh-delete:translate edf file to asc file
 
 %%
 cd(cur_path);
@@ -252,7 +215,6 @@ cd(cur_path);
 clear -global lj
 clear -global lj_Alpha
 diary off
-
 
 % function Marker(number)
 % global lj_Alpha
