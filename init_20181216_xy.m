@@ -1,7 +1,7 @@
 function [edfFile,el] = init_20181216_xy
 %%Create a gameWindow
 globalDefinitions;
-global SubjectName inum;
+global SubjectName  gameWindow tileSize scale;
 sca;
 % Screen('Preference', 'VisualDebugLevel', 1);
 % Screen('Preference', 'Verbosity', 2);
@@ -12,10 +12,12 @@ Screen('Preference', 'SkipSyncTests', 1);%fyh-skip SYNCHRONIZATION test
 screens = Screen('Screens');
 screenNumber = max(screens);
 [myscreenWidth, myscreenHeight] = Screen('WindowSize', screenNumber);
-gamewindowWidth = myscreenWidth / 2;  
-gamewindowHeight = myscreenHeight / 2; 
+gamewindowWidth = myscreenWidth / 1;  
+gamewindowHeight = myscreenHeight / 1; 
+wRect = [0,0,gamewindowWidth,gamewindowHeight];
 black = BlackIndex(screenNumber);
-[gameWindow0, ~] = PsychImaging('OpenWindow', screenNumber, black,[0,0,gamewindowWidth,gamewindowHeight]);
+PsychImaging('PrepareConfiguration');
+[gameWindow0, gameWindowRect0] = PsychImaging('OpenWindow', screenNumber, [0.2 0.2 0.2],[]);
 [screenWidth, screenHeight] = Screen('WindowSize', gameWindow0);
 tileSize = ceil(screenHeight / 44.125/2)*2-1;          %lzq
 midTile = struct('x',floor(tileSize/2),'y',floor(tileSize/2));
@@ -25,13 +27,16 @@ mapHeight = maxRows*tileSize;
 gameScreenWidth = mapWidth;
 gameScreenHeight = mapHeight;
 fitSize = [gameScreenWidth+1, gameScreenHeight];
-PsychImaging('PrepareConfiguration');
-PsychImaging('AddTask', 'General', 'UsePanelFitter', fitSize, 'Centered');
+
+gameWindow = gameWindow0;
+gameWindowRect = gameWindowRect0;
+flipInterval = Screen('GetFlipInterval', gameWindow); 
+
+%PsychImaging('AddTask', 'General', 'UsePanelFitter', fitSize, 'Centered');
 %% Open an on screen window and color it black
 % For help see: Screen OpenWindow?
-[gameWindow, gameWindowRect] = PsychImaging('OpenWindow', screenNumber, black, [0,0,gamewindowWidth,gamewindowHeight]);
+%[gameWindow, gameWindowRect] = PsychImaging('OpenWindow', screenNumber, black, [0,0,gamewindowWidth,gamewindowHeight]);
 %get the monitor flip interval (reflash rate)
-flipInterval = Screen('GetFlipInterval', gameWindow); 
 
 % screens = Screen('Screens');
 % screenNumber = max(screens);

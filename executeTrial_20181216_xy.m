@@ -36,7 +36,7 @@ global lj_Alpha;
 %%
 %fyh-incage pump
 % global water;
-water=pumpManager();
+water=PTBSimia.pumpManager();
 
 %%
 initData;

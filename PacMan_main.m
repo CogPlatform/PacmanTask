@@ -1,3 +1,17 @@
+%% Main PacMan Run Script
+
+% legacy code uses globals
+global mapname datapath SubjectName Left mapPath diaryPath
+
+%% Set up paths
+rootPath = fileparts(mfilename("fullpath"));
+mapPath = [rootPath filesep 'Maps'];
+datapath = [getenv("HOME") filesep 'OptickaFiles' filesep 'SavedData'];
+diaryPath = [datapth filesep 'log.text.log'];
+if isempty(datapath) || ~exist(datapath,'dir')
+	mkdir(datapath);
+end
+
 % % compile c code with mex
 % mex setDO.c u3.o -lm -llabjackusb
 clearvars
@@ -5,19 +19,12 @@ clear -globalpp
 clear PsychImaging
 close all force
 cleanup_sr
-addpath("\PacMan\Incage\incage_code_Map\incage_code_Map\Maps")
-addpath(genpath("\PacMan\Incage\incage_code_Map\incage_code_Map\diary"))
+addpath(mapPath)
 sca;
 % setDO(4,0)%Set the 4th digital output channel to low
 % setDO(6,0)%Set the 6th digital output channel to low            
 
-
-diary myDiaryFile %
-
-
-
-global mapname datapath SubjectName Left;
-
+diary(diaryPath)
 
 audioread('explode.mp3');
 inum = 1;
@@ -51,7 +58,7 @@ if do
         inum = inum+1;
     end
 
-    current_path = [cd, '\diary\'];
+    current_path = "/home/cog5/OptickaFiles/diary";
     mapname = "GenerateRandomMap_1_T_random_dir";
     datapath = strcat(current_path,SubjectName, '-', date, '-', num2str(inum));
     mkdir(datapath)
