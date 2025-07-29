@@ -1,10 +1,11 @@
-function empty_map = GenerateRandomMap_V10(n,dot_percentage)
+function empty_map = GenerateRandomMap_V10
 global fruit_pos;
 global startTile pstartTile;
 global ghostNumber;
-global deadline; deadline = 900;
+global deadline; deadline = 900*3600;
+global ghoststay; ghoststay=0;
 
-ghostNumber = 2; %ZWY
+ghostNumber = 1; %ZWY
 dot_percentage = 0.6;
 n=3;
 empty_map = [ ...

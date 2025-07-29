@@ -59,7 +59,7 @@ if do
     end
 
     current_path = "/home/cog5/OptickaFiles/diary";
-    mapname = "GenerateRandomMap_1_T_random_dir";
+    mapname = "GenerateRandomMap_V10";
     datapath = strcat(current_path,SubjectName, '-', date, '-', num2str(inum));
     mkdir(datapath)
     
