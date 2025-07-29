@@ -31,8 +31,9 @@ result = 0; inum = 1;
 % current_round & used_trial
 path_ = char(datapath);
 if inum > 1
-    path_(end) = string(inum-1);
-    name_ = struct2table(dir(fullfile(path_, '*.mat')));
+    rnum = inum - 1;
+    path_updated = regexprep(path_, '\d+$', num2str(rnum));  % replace no. at the file end
+    name_ = struct2table(dir(fullfile(path_updated, '*.mat')));
     if isempty(name_)
         current_round = 1;
         used_trial = 1;
