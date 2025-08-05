@@ -1,3 +1,5 @@
+function main_20181216xy(opts)
+
 global datapath rewd double_line current_round;
 
 cur_path = cd;
@@ -95,13 +97,14 @@ while result >=0% quit session when result<0
     rewd.rewardX = 1;
     
     endDots = 0;%trial end when no dots on the map
-    initTrialDG(mapname, result);
+	[p,f,e] = fileparts(mapname);
+    initTrialDG(f, result);
     
     image = drawMap;
     texture = Screen('MakeTexture', gameWindow, image);
     clear image
     
-    [result,reward_round,cal] = executeTrial_20181216_xy(texture, endDots);
+    [result,reward_round,cal] = executeTrial_20181216_xy(opts, texture, endDots);
     
     %fyh-delete eyelink calibration
     % if cal
@@ -310,3 +313,5 @@ diary off
 % 
 % end
 % end
+
+end

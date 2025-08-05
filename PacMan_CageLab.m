@@ -2,6 +2,9 @@ function PacMan_CageLab(opts)
 
 	% legacy code uses globals
 	global pacmanOpts mapname datapath SubjectName Left
+
+	opts.js = joystickManager('silentMode',true);
+	opts.water = PTBSimia.pumpManager(opts.reward);
 	
 	% we use alyxManager to identify the save path
 	if isfield(opts,'savePath')
@@ -37,9 +40,9 @@ function PacMan_CageLab(opts)
 	
 	%% the current main function
 	try
-		main_20181216xy;
+		main_20181216xy(opts);
 	catch ME
-		rmdir(datapath);
+		try rmdir(datapath); end
 		sca;
 		rethrow(ME)
 	end

@@ -1,4 +1,5 @@
- global scale;
+%scale
+global scale;
 
 %size of a square tile in pixels
 global tileSize;
@@ -22,17 +23,15 @@ global DIR_RIGHT; DIR_RIGHT = 3;
 global mapWidth; 
 global mapHeight; 
 
+% PTB screen info
 global gameScreenWidth; 
 global gameScreenHeight; 
 global gameScreenXOffset;
 global gameScreenYOffset;
-
 global screens;
 global screenNumber;
 global gameWindow;
-global gameWindow0;
 global gameWindowRect;
-global gameWindowRect0;
 global screenWidth;
 global screenHeight;
 

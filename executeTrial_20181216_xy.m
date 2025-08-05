@@ -33,10 +33,6 @@ passtrial=0;
 % global time_all time;
 global lj_Alpha;
 
-%%
-%fyh-incage pump
-% global water;
-water=PTBSimia.pumpManager();
 
 %%
 initData;
@@ -106,7 +102,7 @@ while gameMap.totalDots>0
     if reward_count > 0
         % setDO(4,1);
         % Marker('Water On')
-        % water.giveRewardDuration(100);
+        opts.water.giveRewardDuration(100);
         reward_count = reward_count - 1;
     else
         % water.stopReward;
