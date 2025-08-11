@@ -1,5 +1,6 @@
 function PacMan_CageLab(opts)
 
+	%some change
 	% legacy code uses globals
 	global pacmanOpts mapname datapath SubjectName Left
 	
