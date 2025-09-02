@@ -1,6 +1,21 @@
-global datapath rewd double_line current_round;
+global datapath rewd double_line current_round SubjectName;
+global allGamesData dailyDataFile % 声明全局变量存储所有游戏数据
+allGamesData = struct();  % 初始化为空结构体
 
 cur_path = cd;
+diary off;
+
+%%
+% move myDiaryFile to today's filefolder
+if ~exist(sprintf('%s/myDiaryFile',datapath), 'file')
+    % diary off;
+    movefile("myDiaryFile", datapath)
+    % newDiaryFilePath = fullfile(datapath, "myDiaryFile");
+    % diary(newDiaryFilePath)
+else
+    %error('myDiaryFile is already in %s',datapath)
+end
+
 
 %%
 %init
@@ -27,34 +42,35 @@ fprintf("map version is %s\n", mapname)
 
 
 %% modified by zzw 20161015
-result = 0; inum = 1;
+result = 0;
 % current_round & used_trial
-path_ = char(datapath);
-if inum > 1
-    rnum = inum - 1;
-    path_updated = regexprep(path_, '\d+$', num2str(rnum));  % replace no. at the file end
-    name_ = struct2table(dir(fullfile(path_updated, '*.mat')));
-    if isempty(name_)
-        current_round = 1;
-        used_trial = 1;
-    else
-        name_ = split(string(name_.name), '-');
-        if length(name_(1,:)) == 1
-            name_ = name_';
-        end
-        [~,i_] = max(double(name_(:,1))*100+double(name_(:,2)));
-        current_round = double(name_(i_,1))+1;
-        used_trial = 1;
-    end
-else
-    current_round = 1;
-    used_trial = 1;
-end
-reward_total = 0;
+% path_ = char(datapath)55
+% ;
+% if inum > 1
+%     path_(end) = string(inum-1);
+%     name_ = struct2table(dir(fullfile(path_, '*.mat')));
+%     if isempty(name_)
+%         current_round = 1;
+%         used_trial = 1;
+%     else
+%         name_ = split(string(name_.name), '-');
+%         if length(name_(1,:)) == 1
+%             name_ = name_';
+%         end
+%         [~,i_] = max(double(name_(:,1))*100+double(name_(:,2)));
+%         current_round = double(name_(i_,1))+1;
+%         used_trial = 1;
+%     end
+% else
+%     current_round = 1;
+%     used_trial = 1;
+% end
+% reward_total = 0;
 reward_trial = 0;
 EndReward = 0;
 lazy = 0;
 lazyTrial = 0;
+
 
 %% print correct rate, ljs
 win=0;totalValid=0;totalAll=0;
@@ -94,6 +110,8 @@ while result >=0% quit session when result<0
     rewd.rewardWin = 0.1;
     rewd.rewardX = 1;
     
+    
+    
     endDots = 0;%trial end when no dots on the map
     initTrialDG(mapname, result);
     
@@ -106,6 +124,7 @@ while result >=0% quit session when result<0
     %fyh-delete eyelink calibration
     % if cal
 
+    
     totalAll = totalAll + 1; 
     totalValid = totalValid + 1;
     
@@ -155,15 +174,35 @@ while result >=0% quit session when result<0
             fprintf('win = %d, lazy = %d, corr_rate = %f, all_valid = %d, all = %d\n', ...
                 win, lazy, win/(totalAll-lazy), totalValid, totalAll);
             clearData;
-            save(strcat(datapath,'/',num2str(current_round),'-', num2str(used_trial),'-',...
-                SubjectName, '-', date,'.mat'),'data' ,'-v7.3');
+            gameID = sprintf('game_%d_%d', current_round, used_trial);
+        
+            % 将当前游戏数据存储为结构体字段
+            allGamesData.(gameID) = data;
+            
+            % 添加元数据（可选）modified by ypz(store the data in every trial in struct)
+            allGamesData.([gameID '_info']) = struct(...
+                'round', current_round, ...
+                'trial', used_trial, ...
+                'result', result, ...
+                'timestamp', datestr(now, 'yyyy-mm-dd HH:MM:SS'));
+            save(dailyDataFile, 'allGamesData', '-v7.3');
             current_round = current_round + 1;
             used_trial = 1;
             lazyTrial = 0;
         case 1 % dead
             clearData;
-            save(strcat(datapath,'/',num2str(current_round),'-', num2str(used_trial),'-',...
-                SubjectName, '-', date,'.mat'),'data' ,'-v7.3');
+            gameID = sprintf('game_%d_%d', current_round, used_trial);
+        
+            % 将当前游戏数据存储为结构体字段
+            allGamesData.(gameID) = data;
+            
+            % 添加元数据（可选）modified by ypz
+            allGamesData.([gameID '_info']) = struct(...
+                'round', current_round, ...
+                'trial', used_trial, ...
+                'result', result, ...
+                'timestamp', datestr(now, 'yyyy-mm-dd HH:MM:SS'));
+            save(dailyDataFile, 'allGamesData', '-v7.3');
             used_trial = used_trial + 1;
             
         case 2 % lazy_dead
@@ -171,8 +210,18 @@ while result >=0% quit session when result<0
             lazyTrial = lazyTrial + 1;
             fprintf('lazy = %d \n', lazyTrial);
             clearData;
-            save(strcat(datapath,'/',num2str(current_round),'-', num2str(used_trial),'-',...
-                SubjectName, '-', date,'.mat'),'data' ,'-v7.3');
+            gameID = sprintf('game_%d_%d', current_round, used_trial);
+        
+            % 将当前游戏数据存储为结构体字段
+            allGamesData.(gameID) = data;
+            
+            % 添加元数据（可选）modifed by ypz
+            allGamesData.([gameID '_info']) = struct(...
+                'round', current_round, ...
+                'trial', used_trial, ...
+                'result', result, ...
+                'timestamp', datestr(now, 'yyyy-mm-dd HH:MM:SS'));
+            save(dailyDataFile, 'allGamesData', '-v7.3');
             used_trial = used_trial + 1;
             if lazyTrial > 10 && ~mod(lazyTrial,10)
                 fprintf('pause 2 minutes, pree G to continue %s\n', datestr(now));
@@ -186,8 +235,18 @@ while result >=0% quit session when result<0
             
         case -1
             clearData;
-            save(strcat(datapath,'/',num2str(current_round),'-', num2str(used_trial),'-',...
-                SubjectName, '-', date,'.mat'),'data' ,'-v7.3');
+            gameID = sprintf('game_%d_%d', current_round, used_trial);
+        
+            % 将当前游戏数据存储为结构体字段
+            allGamesData.(gameID) = data;
+            
+            % 添加元数据（可选）modified by ypz
+            allGamesData.([gameID '_info']) = struct(...
+                'round', current_round, ...
+                'trial', used_trial, ...
+                'result', result, ...
+                'timestamp', datestr(now, 'yyyy-mm-dd HH:MM:SS'));
+            save(dailyDataFile, 'allGamesData', '-v7.3');
             fprintf('Monkey drank %.2f seconds water this trial and %.2f seconds in total\n', ...
                 reward_trial/60, reward_total/60)
     end
@@ -197,10 +256,30 @@ while result >=0% quit session when result<0
     if used_trial == 100
         result = -2;
     end
-
+save(dailyDataFile, 'allGamesData', '-v7.3');
 end
+ 
+%%
+%fyh-delete eyelink file
 
+%% how much water and fruit
+if result == -2
+    fprintf("monkey was lazy too many trials, end the experiment or restart the game.\n")
+    fprintf("%s\n", datestr(now))
+end
+answer = input('How much water received: ', 's');
+if isempty(answer)
+    answer = '200';
+end
+fprintf('Monkey drinks %sml water in total\n', answer);
+fprintf('%.2fml water per second\n', str2double(answer)/reward_total*60);
+answer = input('How much fruit received: ', 's');
+if isempty(answer)
+    answer = '100';
+end
+fprintf('Monkey eats %sg fruit\n', answer);
 
+%% fyh-delete:translate edf file to asc file
 
 %%
 cd(cur_path);
@@ -216,6 +295,7 @@ cd(cur_path);
 clear -global lj
 clear -global lj_Alpha
 diary off
+
 
 % function Marker(number)
 % global lj_Alpha

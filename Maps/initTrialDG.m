@@ -1,4 +1,4 @@
-function initTrialDG(mapname, continueTrial)
+function opts = initTrialDG(opts, continueTrial)
 
 
 %% Global value
@@ -13,10 +13,15 @@ global is_scared_train;
 ghostActive = 1;
 ghostEndPosition = 0;
 
+addpath(opts.mapPath);
+
+tileSize = opts.tileSize;
+flipInterval = opts.flipInterval;
+
 %% Start a new trial
 if (continueTrial == 0)
     %% Map
-    map1 = eval(mapname);
+    map1 = eval(opts.mapName);
     constructMap(28,36,map1);
     
     %% Ghost settings
