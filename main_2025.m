@@ -1,25 +1,20 @@
 function main_2025(opts)
 
-global datapath rewd double_line current_round SubjectName;
-global allGamesData % 声明全局变量存储所有游戏数据
-allGamesData = struct();  % 初始化为空结构体
+global rewd current_round;
+global gameWindow
+global data;
+global passtrial; % press key 'p' to pass current trial
+global block_num;block_num = 1;
 
 cur_path = cd;
 
-%% %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%% %%
-%%%%%%%%%%%%%%%%%%%%%%%%%%%%% INIT TRIAL %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+%% %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%  INIT SESSION
 opts = init_2025(opts);
-%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
-%% %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%% %%
+allGamesData = struct();  % main task data structure
+%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
 
 goKey = KbName('g');
 [~, ~, keyCode] = KbCheck;
-
-global gameWindow
-global OldPriority data SubjectName mapname;
-global passtrial; % press key 'p' to pass current trial
-global lj_Alpha; 
-global block_num;block_num = 1;
 
 fprintf("\n===>>> Map version is %s\n", opts.mapName)
 
@@ -32,13 +27,13 @@ lazy = 0;
 lazyTrial = 0;
 used_trial = 0;
 
-
 %% print correct rate, ljs
 win=0; totalValid=0; totalAll=0;
-begin_time = datestr(now,0);
+opts.beginDate = datestr(now,0);
+opts.beginTime = GetSecs;
 
-%% %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
-while result >=0  % quit session when result<0  
+%% %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%% MAIN LOOP
+while result >=0  % quit session when result<0
 %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
 
 	%% main part
@@ -63,13 +58,10 @@ while result >=0  % quit session when result<0
 	clear image
 	
 
-	%% %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%% %%
-	%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%% RUN TRIAL %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+	%% %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%% RUN TRIAL
 	[result, reward_round, cal, opts] = executeTrial_2025(texture, endDots, opts);
 	%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
-	%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
 	
-
 	totalAll = totalAll + 1; 
 	totalValid = totalValid + 1;
 	
@@ -77,7 +69,7 @@ while result >=0  % quit session when result<0
 	reward_trial = reward_trial + reward_round;
 	
 	switch result
-		case 0 % success
+		case 0 %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%% success
 			block_num = block_num + 1;
 			if ~passtrial
 				reward_win = rewd.rewardWin * rewd.rewardX;
@@ -101,8 +93,6 @@ while result >=0  % quit session when result<0
 					% MarkerWater('Water Off')
 					pause(0.37);
 				end
-	
-				
 			else
 				fprintf('Kep Pass\n')
 				fprintf('Monkey drank %.2f seconds water this trial and %.2f seconds in total\n', ...
@@ -126,11 +116,10 @@ while result >=0  % quit session when result<0
 				'trial', used_trial, ...
 				'result', result, ...
 				'timestamp', datestr(now, 'yyyy-mm-dd HH:MM:SS'));
-			save(opts.dataFile, 'allGamesData', '-v7.3');
 			current_round = current_round + 1;
 			used_trial = 1;
 			lazyTrial = 0;
-		case 1 % dead
+		case 1 %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%% dead
 			clearData;
 			gameID = sprintf('game_%d_%d', current_round, used_trial);
 		
@@ -143,10 +132,9 @@ while result >=0  % quit session when result<0
 				'trial', used_trial, ...
 				'result', result, ...
 				'timestamp', datestr(now, 'yyyy-mm-dd HH:MM:SS'));
-			save(opts.dataFile, 'allGamesData', '-v7.3');
 			used_trial = used_trial + 1;
 			
-		case 2 % lazy_dead
+		case 2 %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%% lazy_dead
 			lazy = lazy + 1;
 			lazyTrial = lazyTrial + 1;
 			fprintf('lazy = %d \n', lazyTrial);
@@ -162,7 +150,6 @@ while result >=0  % quit session when result<0
 				'trial', used_trial, ...
 				'result', result, ...
 				'timestamp', datestr(now, 'yyyy-mm-dd HH:MM:SS'));
-			save(opts.dataFile, 'allGamesData', '-v7.3');
 			used_trial = used_trial + 1;
 			if lazyTrial > 10 && ~mod(lazyTrial,10)
 				fprintf('pause 2 minutes, pree G to continue %s\n', datestr(now));
@@ -174,7 +161,7 @@ while result >=0  % quit session when result<0
 				end
 			end
 			
-		case -1
+		case -1 %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
 			clearData;
 			gameID = sprintf('game_%d_%d', current_round, used_trial);
 		
@@ -187,48 +174,36 @@ while result >=0  % quit session when result<0
 				'trial', used_trial, ...
 				'result', result, ...
 				'timestamp', datestr(now, 'yyyy-mm-dd HH:MM:SS'));
-			save(opts.dataFile, 'allGamesData', '-v7.3');
 			fprintf('Monkey drank %.2f seconds water this trial and %.2f seconds in total\n', ...
 				reward_trial/60, reward_total/60)
 	end
-	
-	
-	%% handle used_trial > 99
+	% handle used_trial > 99
 	if used_trial == 100
 		result = -2;
 	end
-save(opts.dataFile, 'allGamesData', '-v7.3');
+	%% %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%% SAVE DATA ON EACH TRIAL
+	save(opts.dataName, 'allGamesData', '-v7.3');
+	%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
 end
- 
-%%
-%fyh-delete eyelink file
 
-%% how much water and fruit
-if result == -2
-	fprintf("monkey was lazy too many trials, end the experiment or restart the game.\n")
-	fprintf("%s\n", datestr(now))
+%% %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%% USE ALYX TO SAVE DATA
+%  Send data to Alyx if enabled
+if in.useAlyx
+	in.session.dataBucket = 'Minio-TianMingLab';
+	in.session.dataRepo = 'http://172.16.102.77:9000';
+	[in.session, success] = clutil.initAlyxSession(opts, opts.session);
+	if success
+		in.session = clutil.endAlyxSession(opts, opts.session, "PASS");
+	end
 end
-answer = input('How much water received: ', 's');
-if isempty(answer)
-	answer = '200';
-end
-fprintf('Monkey drinks %sml water in total\n', answer);
-fprintf('%.2fml water per second\n', str2double(answer)/reward_total*60);
-answer = input('How much fruit received: ', 's');
-if isempty(answer)
-	answer = '100';
-end
-fprintf('Monkey eats %sg fruit\n', answer);
 
-%% fyh-delete:translate edf file to asc file
-
-%%
+%
 cd(cur_path);
 sca;
-Priority(OldPriority);
+Priority(0);
 
 %% last print
-fprintf('Monkey started at %s\n', begin_time)
+fprintf('Monkey started at %s\n', opts.beginTime)
 fprintf('win = %d, lazy = %d, corr_rate = %f, all_valid = %d, all = %d\n', ...
 	win, lazy, win/totalValid, totalValid, totalAll);
 
@@ -236,100 +211,5 @@ cd(cur_path);
 clear -global lj
 clear -global lj_Alpha
 diary off
-
-
-% function Marker(number)
-% global lj_Alpha
-% lj_Alpha.setFIO(0,4)
-% lj_Alpha.setFIO(0,5)
-% lj_Alpha.setFIO(0,6)
-% %% tens
-% tens =  floor(number/10);
-% bin2 = dec2bin(tens,4);
-% low = 4 - find(bin2 == '0');
-% high = 4 - find(bin2 == '1');
-% for i = 1:length(low)
-%     lj_Alpha.setFIO(0,low(i))
-% end
-% for j = 1:length(high)
-%     lj_Alpha.setFIO(1,high(j))
-% end
-% lj_Alpha.setFIO(1,7)
-% lj_Alpha.setFIO(0,7)
-% %% unit
-% num = mod(number,10);
-% bin2 = dec2bin(num,4);
-% low = 4 - find(bin2 == '0');
-% high = 4 - find(bin2 == '1');
-% for i = 1:length(low)
-%     lj_Alpha.setFIO(0,low(i))
-% end
-% for j = 1:length(high)
-%     lj_Alpha.setFIO(1,high(j))
-% end
-% lj_Alpha.setFIO(1,7)
-% lj_Alpha.setFIO(0,7)
-% 
-% end
-
-% function MarkerWater(type)
-% global lj_Alpha
-% switch type
-%     case 'Water On'
-%         lj_Alpha.setFIO(0,1)
-%         lj_Alpha.setFIO(0,2)
-%         lj_Alpha.setFIO(1,7)
-%         lj_Alpha.setFIO(0,7)
-%         lj_Alpha.setFIO(1,1)
-%         lj_Alpha.setFIO(1,2)
-%     case 'Water Off'
-%         lj_Alpha.setFIO(0,1)
-%         lj_Alpha.setFIO(0,3)
-%         lj_Alpha.setFIO(1,7)
-%         lj_Alpha.setFIO(0,7)
-%         lj_Alpha.setFIO(1,1)
-%         lj_Alpha.setFIO(1,3)
-% end
-% end
-% 
-% function Marker_reset
-% global lj_Alpha
-% lj_Alpha.setFIO(1,0)
-% lj_Alpha.setFIO(1,1)
-% lj_Alpha.setFIO(1,2)
-% lj_Alpha.setFIO(1,3)
-% lj_Alpha.setFIO(1,4)
-% lj_Alpha.setFIO(1,5)
-% lj_Alpha.setFIO(1,6)
-% lj_Alpha.setFIO(0,7)
-% end
-
-
-% function ITI_Marker(type)
-% global lj_Alpha
-% switch type
-% 
-%     % for ITI -20231024 lyw
-%        case 'ITI start'
-%         lj_Alpha.setFIO(1,7)
-%         lj_Alpha.setFIO(0,6)
-%         lj_Alpha.setFIO(0,5)
-%         lj_Alpha.setFIO(0,4)
-%         lj_Alpha.setFIO(0,3)
-%         lj_Alpha.setFIO(0,2)
-%         lj_Alpha.setFIO(1,1)
-%         lj_Alpha.setFIO(0,0)
-%         case 'ITI end'
-%         lj_Alpha.setFIO(1,7)
-%         lj_Alpha.setFIO(0,6)
-%         lj_Alpha.setFIO(0,5)
-%         lj_Alpha.setFIO(0,4)
-%         lj_Alpha.setFIO(0,3)
-%         lj_Alpha.setFIO(0,2)
-%         lj_Alpha.setFIO(1,1)
-%         lj_Alpha.setFIO(1,0)
-% 
-% end
-% end
 
 end
