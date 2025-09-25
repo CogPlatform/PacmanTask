@@ -105,7 +105,7 @@ while gameMap.totalDots>0
     if reward_count > 0
         % setDO(4,1);
         % Marker('Water On')
-        % water.giveRewardDuration(100);
+        opts.water.giveReward(100,0);
         reward_count = reward_count - 1;
     else
         % water.stopReward;

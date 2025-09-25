@@ -30,6 +30,7 @@ used_trial = 0;
 %% print correct rate, ljs
 win=0; totalValid=0; totalAll=0;
 opts.beginDate = datestr(now,0);
+begin_time = opts.beginDate;
 opts.beginTime = GetSecs;
 
 %% %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%% MAIN LOOP
@@ -56,7 +57,8 @@ while result >=0  % quit session when result<0
 	image = drawMap;
 	texture = Screen('MakeTexture', gameWindow, image);
 	clear image
-	
+
+	opts.startTime = GetSecs;
 
 	%% %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%% RUN TRIAL
 	[result, reward_round, cal, opts] = executeTrial_2025(texture, endDots, opts);
@@ -183,17 +185,31 @@ while result >=0  % quit session when result<0
 	end
 	%% %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%% SAVE DATA ON EACH TRIAL
 	save(opts.dataName, 'allGamesData', '-v7.3');
+	fprintf('--->>> Trial %i Data saved to %s\n',used_trial,opts.dataName);
 	%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+
+	%% %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%% SEND TRIAL INFO to COGMOTEGO
+	opts.trialN = used_trial;
+	opts.loopN = current_round;
+	opts.endTime = GetSecs;
+	opts.result = result;
+	broadcastTrial(opts, true);
+	%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+
 end
+
+%% %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%% FINAL BROADCAST
+opts.endTime = GetSecs;
+broadcastTrial(opts, false);
 
 %% %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%% USE ALYX TO SAVE DATA
 %  Send data to Alyx if enabled
-if in.useAlyx
-	in.session.dataBucket = 'Minio-TianMingLab';
-	in.session.dataRepo = 'http://172.16.102.77:9000';
-	[in.session, success] = clutil.initAlyxSession(opts, opts.session);
+if opts.useAlyx
+	opts.session.dataBucket = 'Minio-TianMingLab';
+	opts.session.dataRepo = 'http://172.16.102.77:9000';
+	[opts.session, success] = clutil.initAlyxSession(opts, opts.session);
 	if success
-		in.session = clutil.endAlyxSession(opts, opts.session, "PASS");
+		opts.session = clutil.endAlyxSession(opts, opts.session, "PASS");
 	end
 end
 

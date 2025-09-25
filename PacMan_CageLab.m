@@ -22,6 +22,7 @@ function PacMan_CageLab(opts)
 	% we use alyxManager to identify the proper save path
 	% ALF file paths compatible with Alyx database
 	% https://int-brain-lab.github.io/ONE/alf_intro.html
+	if isfield(opts,'alyx') && isa(opts.alyx,'alyxManager'); opts.alyx.checkPaths; end
 	if isfield(opts,'savePath')
 		opts.alyx.paths.savedData = opt.savePath;
 	else
@@ -33,19 +34,20 @@ function PacMan_CageLab(opts)
 	opts.dataName = [opts.alyxPath filesep 'matlab.raw.pacman.' opts.ALFName '.mat'];
 	
 	%% =========================== Set up other paths
-	%
+	% additional paths, diary is saved to ALF path too
 	opts.rootPath = fileparts(mfilename("fullpath"));
 	opts.mapPath = [opts.rootPath filesep 'Maps'];
 	addpath(opts.mapPath);
-	opts.diaryPath = [opts.alyxPath filesep '_matlab_diary.' opts.ALFName '.log'];
+	opts.diaryPath = [opts.alyxPath filesep '_matlab_diary.pacman.' opts.ALFName '.log'];
 	diary(opts.diaryPath);
-	fprintf("===>>> PacMan Task ALF path: %s\n",opts.alyxPath);
+	fprintf("\n===>>> PacMan Task ALF path: %s\n",opts.alyxPath);
 
 	%% =========================== hardware initialisation
 	if opts.audio
 		%we use audio manager as it stops conflicts with PTB tasks.
-		opts.aM = audioManager('fileNath',fullfile(opts.rootPath, 'explode.mp3'));
+		opts.aM = audioManager('fileName',fullfile(opts.rootPath, 'explode.mp3'));
 		setup(opts.aM);
+		opts.aM.beep(2000,0.1,0.1);
 	else
 		opts.aM = audioManager('silentMode', true);
 	end
@@ -56,12 +58,12 @@ function PacMan_CageLab(opts)
 	end
 
 	%% =========================== other initialisations
-	SubjectName = opts.session.subjectName;
+	SubjectName = opts.session.subjectName; % comes from CageLab GUI
 	Left = 0;
 	if ~isfield(opts,'mapName') || isempty(opts.mapName)
 		opts.mapName = "GenerateRandomMap_1_oneWay_random";
 	end
-	[~,opts.mapName,~] = fileparts(opts.mapName);
+	[~,opts.mapName,~] = fileparts(opts.mapName); % remove .m
 	mapname = opts.mapName;
 	
 	%% =========================== the current main function
