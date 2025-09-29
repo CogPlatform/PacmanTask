@@ -7,14 +7,6 @@ function PacMan_CageLab(opts)
 	% legacy code uses globals :-( TODO - refactor away globals!
 	global mapname SubjectName Left
 
-	%% =========================== debug mode?
-	if max(Screen('Screens'))==0 && opts.debug
-		%sf = kPsychGUIWindow; windowed = [0 0 1300 800]; 
-		PsychDebugWindowConfiguration
-	else
-		clear screen
-	end
-
 	%% =========================== initial config for PTB
 	PsychDefaultSetup(2);
 
