@@ -13,8 +13,9 @@ opts = init_2025(opts);
 allGamesData = struct();  % main task data structure
 %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
 
+Priority(MaxPriority(gameWindow));
 goKey = KbName('g');
-[~, ~, keyCode] = KbCheck;
+[~, ~, keyCode] = KbCheck(-1);
 
 fprintf("\n===>>> Map version is %s\n", opts.mapName)
 
@@ -32,6 +33,7 @@ win=0; totalValid=0; totalAll=0;
 opts.beginDate = datestr(now,0);
 begin_time = opts.beginDate;
 opts.beginTime = GetSecs;
+opts.rewards = reward_total;
 
 %% %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%% MAIN LOOP
 while result >=0  % quit session when result<0
@@ -69,7 +71,7 @@ while result >=0  % quit session when result<0
 	
 	reward_total = reward_total + reward_round;
 	reward_trial = reward_trial + reward_round;
-	
+		
 	switch result
 		case 0 %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%% success
 			block_num = block_num + 1;
@@ -191,8 +193,13 @@ while result >=0  % quit session when result<0
 	%% %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%% SEND TRIAL INFO to COGMOTEGO
 	opts.trialN = used_trial;
 	opts.loopN = current_round;
-	opts.endTime = GetSecs;
+	opts.rewards = reward_total;
 	opts.result = result;
+	opts.phase = 1;
+	opts.reactionTime = NaN;
+	opts.correctRate = NaN;
+	opts.correctRateRecent = NaN;
+	opts.endTime = GetSecs;
 	broadcastTrial(opts, true);
 	%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
 

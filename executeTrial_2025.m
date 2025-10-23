@@ -80,14 +80,12 @@ if ghostNumber>0
     end
 end
 drawPlayer;
-topPriorityLevel = MaxPriority(gameWindow);
-Priority(topPriorityLevel);
 ifi = Screen('GetFlipInterval', gameWindow);
 %fyh
 % setDO(4,0);
 % Marker('Water Off')
 %% Flip the first frame
-[JSMoved, JSCode, JSVoltage] = eval(JoyStickCheck);
+[JSMoved, JSCode, JSVoltage] = JSCheck;
 [vbl,~,flip,miss] = Screen('Flip', gameWindow);
 %fyh
 % Eyelink('message','Trial Start');
@@ -105,6 +103,7 @@ while gameMap.totalDots>0
     if reward_count > 0
         % setDO(4,1);
         % Marker('Water On')
+		if opts.audio; opts.aM.beep(3000,0.1,0.1); end
         opts.water.giveReward(100,0);
         reward_count = reward_count - 1;
     else

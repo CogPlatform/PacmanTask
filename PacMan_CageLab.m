@@ -21,7 +21,7 @@ function PacMan_CageLab(opts)
 		opts.savePath = opts.alyx.paths.savedData;
 	end
 	opts.alyx.checkPaths; % ensure paths are correct on the local machine
-	[opts.alyxPath, opts.sID, opts.dID, opts.ALFName] = opts.alyx.getALF(...
+	[opts.alyxPath, opts.sessionID, opts.dateID, opts.ALFName] = opts.alyx.getALF(...
 		opts.session.subjectName, opts.session.labName, true);
 	opts.dataName = [opts.alyxPath filesep 'matlab.raw.pacman.' opts.ALFName '.mat'];
 	
@@ -37,7 +37,8 @@ function PacMan_CageLab(opts)
 	%% =========================== hardware initialisation
 	if opts.audio
 		%we use audio manager as it stops conflicts with PTB tasks.
-		opts.aM = audioManager('fileName',fullfile(opts.rootPath, 'explode.mp3'));
+		opts.aM = audioManager('device', opts.audioDevice,...
+		'fileName',fullfile(opts.rootPath, 'explode.mp3'));
 		setup(opts.aM);
 		opts.aM.beep(2000,0.1,0.1);
 	else
@@ -48,6 +49,18 @@ function PacMan_CageLab(opts)
 	else
 		opts.water = PTBSimia.pumpManager(true); % true = dummy pump
 	end
+	opts.broadcast = matmoteGO.broadcast;
+	[~,hname] = system('hostname');
+	hname = strip(hname);
+	if isempty(hname); hname = 'unknown'; end
+	opts.hostname = hname;
+
+	%% =========================== keyboard setup
+	KbReleaseWait; %make sure keyboard keys are all released
+	Priority(0);
+	ListenChar(0); %ListenChar(-1); %2=capture all keystrokes
+	RestrictKeysForKbCheck([]);
+	KbName('UnifyKeyNames');
 
 	%% =========================== other initialisations
 	SubjectName = opts.session.subjectName; % comes from CageLab GUI

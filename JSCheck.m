@@ -21,7 +21,7 @@ ifup = KbName('UpArrow');
 ifleft = KbName('LeftArrow');      
 ifright = KbName('RightArrow'); 
 
-[~, ~, keyCode] = KbCheck;
+[~, ~, keyCode] = KbCheck(-1);
 
 if keyCode(ifdown)
     down =1;
