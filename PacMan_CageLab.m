@@ -34,13 +34,19 @@ function PacMan_CageLab(opts)
 	diary(opts.diaryPath);
 	fprintf("\n===>>> PacMan Task ALF path: %s\n",opts.alyxPath);
 
+	%% =========================== force resolution
+	if opts.forceResolution
+		ns = Screen('Resolution',opts.screen,1920,1080,60);
+		disp(ns);
+	end
+
 	%% =========================== hardware initialisation
 	if opts.audio
 		%we use audio manager as it stops conflicts with PTB tasks.
 		opts.aM = audioManager('device', opts.audioDevice,...
 		'fileName',fullfile(opts.rootPath, 'explode.mp3'));
 		setup(opts.aM);
-		opts.aM.beep(2000,0.1,0.1);
+		if opts.audioBeeps; opts.aM.beep(2000,0.1,0.1); end
 	else
 		opts.aM = audioManager('silentMode', true);
 	end
