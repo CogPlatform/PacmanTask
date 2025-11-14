@@ -56,6 +56,7 @@ function PacMan_CageLab(opts)
 		opts.water = PTBSimia.pumpManager(true); % true = dummy pump
 	end
 	opts.broadcast = matmoteGO.broadcast;
+	opts.status = matmoteGO.status(); % initialize experiment status object
 	[~,hname] = system('hostname');
 	hname = strip(hname);
 	if isempty(hname); hname = 'unknown'; end
@@ -81,6 +82,7 @@ function PacMan_CageLab(opts)
 	try
 		main_2025(opts);
 	catch ME
+		try opts.status.updateStatusToStopped(); end
 		sca;
 		rethrow(ME)
 	end

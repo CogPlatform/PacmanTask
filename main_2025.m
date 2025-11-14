@@ -9,6 +9,7 @@ global block_num;block_num = 1;
 cur_path = cd;
 
 %% %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%  INIT SESSION
+opts.status.updateStatusToRunning(); % tell cogmoteGO a task is started
 opts = init_2025(opts);
 allGamesData = struct();  % main task data structure
 %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
@@ -208,12 +209,13 @@ end
 %% %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%% FINAL BROADCAST
 opts.endTime = GetSecs;
 broadcastTrial(opts, false);
+try opts.status.updateStatusToStopped(); end
 
 %% %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%% USE ALYX TO SAVE DATA
 %  Send data to Alyx if enabled
 if opts.useAlyx
-	opts.session.dataBucket = 'Minio-TianMingLab';
-	opts.session.dataRepo = 'http://172.16.102.77:9000';
+	%opts.session.dataBucket = 'Minio-TianMingLab';
+	%opts.session.dataRepo = 'http://172.16.102.77:9000';
 	[opts.session, success] = clutil.initAlyxSession(opts, opts.session);
 	if success
 		opts.session = clutil.endAlyxSession(opts, opts.session, "PASS");
