@@ -104,7 +104,7 @@ while gameMap.totalDots>0
         % setDO(4,1);
         % Marker('Water On')
 		if opts.audio && opts.audioBeeps; opts.aM.beep(opts.correctBeep,0.1,0.1); end
-        opts.water.giveReward(100,0);
+        opts.water.giveReward(opts.rewardTime,0);
         reward_count = reward_count - 1;
     else
         % water.stopReward;
@@ -326,8 +326,7 @@ while gameMap.totalDots>0
     end
     start = GetSecs();
     %%
-    [~, ~, keyCode] = KbCheck;
-    [JSMoved, JSCode, JSVoltage, bug] = eval(JoyStickCheck);
+    [JSMoved, JSCode, JSVoltage, bug, keyCode] = JSCheck;
     JSCheckTime = GetSecs();
     bugall = bug + bugall;
     %%  save data / modified by ljs 2019.11.01

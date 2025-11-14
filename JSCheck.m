@@ -1,4 +1,4 @@
-function [JSMoved, JSCode, JSVoltage, bug] = JSCheck
+function [JSMoved, JSCode, JSVoltage, bug, keyCode] = JSCheck
 global JSup JSdown JSleft JSright up down left right; % trans_data;
 global bug; bug = 0;
 % for joysticks with 4 channels, left hand version（fyh:?)

@@ -36,8 +36,8 @@ function PacMan_CageLab(opts)
 
 	%% =========================== force resolution
 	if opts.forceResolution
-		ns = Screen('Resolution',opts.screen,1920,1080,60);
-		disp(ns);
+		Screen('Resolution',opts.screen,1920,1080,60);
+		disp(Screen('Resolution',opts.screen));
 	end
 
 	%% =========================== hardware initialisation
@@ -46,7 +46,7 @@ function PacMan_CageLab(opts)
 		opts.aM = audioManager('device', opts.audioDevice,...
 		'fileName',fullfile(opts.rootPath, 'explode.mp3'));
 		setup(opts.aM);
-		if opts.audioBeeps; opts.aM.beep(2000,0.1,0.1); end
+		if opts.audioBeeps; opts.aM.beep(3000,0.1,0.1); end
 	else
 		opts.aM = audioManager('silentMode', true);
 	end
