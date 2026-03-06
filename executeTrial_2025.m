@@ -51,8 +51,7 @@ calKey = KbName('c');
 change_block = KbName('b');
 % change_block = KbName('RightArrow');
 % goKey = KbName('g');
-[~, ~, keyCode] = KbCheck;
-JoyStickCheck = 'JSCheck';
+[~, ~, keyCode] = KbCheck(-1);
 reward_count = 0;
 reward_round = 0;
 End_all = 0;
@@ -168,7 +167,7 @@ while gameMap.totalDots>0
                 % Marker('Water Off')
                 if opts.audio; opts.aM.play; end
                 dead = 1;
-                pause(opts.timeOut);
+                WaitSecs(opts.timeOut);
                 break;
             end
             ghostReleaseUpdate(6);  % refresh
@@ -223,7 +222,7 @@ while gameMap.totalDots>0
             deadSound;
             dead=1;
             idx=0;
-            pause(5);
+            WaitSecs(5);
             break;
         end
         %% key operation
@@ -385,7 +384,7 @@ if ~passtrial
             end
             Screen('Flip', gameWindow);
         end
-        pause(0.3);
+        WaitSecs(0.3);
         Screen('Flip', gameWindow);
         % Eyelink('message','Trial End');
         % Marker('Trial End');
@@ -405,14 +404,14 @@ if ~passtrial
     else
         result = -1; % ESC pressed, quit session
         Screen('Flip', gameWindow);
-        pause(1)
+        WaitSecs(1)
         % Eyelink('message','Trial End');
         % Marker('Trial End');
     end
 else
     result = 0; % success!
     Screen('Flip', gameWindow);
-    pause(1)
+    WaitSecs(1)
     % Eyelink('message','Trial End');
     % Marker('Trial End');
 end

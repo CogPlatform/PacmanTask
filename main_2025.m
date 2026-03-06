@@ -18,6 +18,15 @@ Priority(MaxPriority(gameWindow));
 goKey = KbName('g');
 [~, ~, keyCode] = KbCheck(-1);
 
+if isfield(opts,'mapPath') && exist(opts.mapPath,'dir')
+	fprintf("===>>> Adding map path: %s\n", opts.mapPath);
+	addpath(opts.mapPath,'-begin');
+	mapLocation = which(opts.mapName);
+	fprintf("===>>> Map file found at: %s\n", mapLocation);
+else
+	error('Map path %s does not exist', opts.mapPath);
+end
+
 fprintf("\n===>>> Map version is %s\n", opts.mapName)
 
 %% modified by zzw 20161015
@@ -93,10 +102,10 @@ while result >=0  % quit session when result<0
 				for i=1:EndReward
 					% MarkerWater('Water On')
 					% setDO(4,1);
-					pause(reward_win);% wait for this drop of water end
+					WaitSecs(reward_win);% wait for this drop of water end
 					% setDO(4,0);
 					% MarkerWater('Water Off')
-					pause(0.37);
+					WaitSecs(0.37);
 				end
 			else
 				fprintf('Kep Pass\n')
@@ -160,9 +169,9 @@ while result >=0  % quit session when result<0
 				fprintf('pause 2 minutes, pree G to continue %s\n', datestr(now));
 				kb_time = 120 * 100;
 				while kb_time ~= 0 && ~keyCode(goKey)
-					pause(0.01)
+					WaitSecs(0.01)
 					kb_time = kb_time - 1;
-					[~, ~, keyCode] = KbCheck;
+					[~, ~, keyCode] = KbCheck(-1);
 				end
 			end
 			

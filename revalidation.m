@@ -38,7 +38,7 @@ for i = 1:length(px)
         [point_x,point_y,point_x+point_size,point_y+point_size]);
     Screen('Flip', gameWindow, [], [], 1);
     if i == 1
-        pause(1);
+        WaitSecs(1);
     end
     [result,Esc_] = check_eyepos(point_x, point_y, eye_used, el, distance);
     if Esc_
@@ -52,7 +52,7 @@ for i = 1:length(px)
         fprintf('Pass at %d-%d %s\n', current_round, used_trial, char(point(i)))
         Screen('Flip', gameWindow, [], [], 1);
         setDO(4,1)
-        pause(0.03)
+        WaitSecs(0.03)
         setDO(4,0)
     else
         j = [j,i]; %#ok<AGROW>
@@ -61,14 +61,14 @@ for i = 1:length(px)
         fprintf('Fail at %d-%d %s\n', current_round, used_trial, char(point(i)))
         Screen('Flip', gameWindow, [], [], 1);
     end
-    pause(0.1)
+    WaitSecs(0.1)
     fprintf("-----\n")
 end
 if success == num_point
     Result = 1;
     return
 end
-pause(2)
+WaitSecs(2)
 %% Recheck
 for i = j
     point_x = px(i);
@@ -89,7 +89,7 @@ for i = j
         fprintf('Pass at %d-%d %s re-check\n', current_round, used_trial, char(point(i)))
         Screen('Flip', gameWindow, [], [], 1);
         setDO(4,1)
-        pause(0.03)
+        WaitSecs(0.03)
         setDO(4,0)
     else
         Eyelink('message', sprintf('Fail point %s re-check at %d-%d\n', ...
@@ -97,7 +97,7 @@ for i = j
         fprintf('Fail at %d-%d %s re-check\n', current_round, used_trial, char(point(i)))
         Screen('Flip', gameWindow, [], [], 1);
     end
-    pause(0.1)
+    WaitSecs(0.1)
     fprintf("-----\n")
 end
 

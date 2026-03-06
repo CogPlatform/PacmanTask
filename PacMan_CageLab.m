@@ -1,8 +1,7 @@
 function PacMan_CageLab(opts)
+disp(opts);
 % PACMAN_CAGELAB - Run the PacMan Cage Lab experiment, 
 % opts are the settings from the GUI
-
-	fprintf("===>>> PacMan Task Starting...\n");
 
 	% legacy code uses globals :-( TODO - refactor away globals!
 	global mapname SubjectName Left
@@ -28,10 +27,14 @@ function PacMan_CageLab(opts)
 	%% =========================== Set up other paths
 	% additional paths, diary is saved to ALF path too
 	opts.rootPath = fileparts(mfilename("fullpath"));
-	opts.mapPath = [opts.rootPath filesep 'Maps'];
-	addpath(opts.mapPath);
+	if ~isfield(opts,'mapPath') || ~exist(opts.mapPath,'dir')
+		opts.mapPath = [opts.rootPath filesep 'Maps'];
+	end
 	opts.diaryPath = [opts.alyxPath filesep '_matlab_diary.pacman.' opts.ALFName '.log'];
 	diary(opts.diaryPath);
+
+	fprintf("\n===>>> PacMan Task Starting...\n");
+	disp(opts);
 	fprintf("\n===>>> PacMan Task ALF path: %s\n",opts.alyxPath);
 
 	%% =========================== force resolution
@@ -62,12 +65,17 @@ function PacMan_CageLab(opts)
 	if isempty(hname); hname = 'unknown'; end
 	opts.hostname = hname;
 
+	%% =========================== messaging setup
+	if ~opts.remote
+		opts.zmq = [];
+	end
+
 	%% =========================== keyboard setup
-	KbReleaseWait; %make sure keyboard keys are all released
 	Priority(0);
 	ListenChar(0); %ListenChar(-1); %2=capture all keystrokes
 	RestrictKeysForKbCheck([]);
-	KbName('UnifyKeyNames');
+	clear PsychHID; % clear any previous keyboard events
+	clear KbCheck; % clear any previous keyboard events
 
 	%% =========================== other initialisations
 	SubjectName = opts.session.subjectName; % comes from CageLab GUI

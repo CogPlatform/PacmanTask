@@ -133,7 +133,7 @@ while gameMap.totalDots>0 && (~keyDown || ~keyCode(escapeKey)) && (current_state
                 setDO(4,0);
                 
                 deadSound; 
-                pause(9);
+                WaitSecs(9);
                 break;
             end
             ghostReleaseUpdate(6);  % refresh

@@ -66,8 +66,8 @@ while result >=0% quit session when result<0  azxa
                 end
 
                 for i=1:EndReward
-                    setDO(4,1);            pause(0.08);% unit: second previous value 0.15, modified by SRX 20180723
-                    setDO(4,0);            pause(0.37);
+                    setDO(4,1);            WaitSecs(0.08);% unit: second previous value 0.15, modified by SRX 20180723
+                    setDO(4,0);            WaitSecs(0.37);
                 end
             end
             %% Interval between trails modified by hy 2017/01/15
@@ -79,7 +79,7 @@ while result >=0% quit session when result<0  azxa
                     num=0;
                     Interval(current_round)=Interval(current_round)+IntervalOfTrails;
                 end;
-                pause(IntervalOfTrails/20);
+                WaitSecs(IntervalOfTrails/20);
                 num=num+1;
             end
             
@@ -103,7 +103,7 @@ while result >=0% quit session when result<0  azxa
                     num=0;
                     %Interval(current_round)=Interval(current_round)+IntervalOfTrails;
                 end;
-                pause(IntervalOfTrails/20);
+                WaitSecs(IntervalOfTrails/20);
                 num=num+1;
             end
             flipSecs = 5;

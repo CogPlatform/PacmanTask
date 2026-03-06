@@ -91,7 +91,7 @@ while result >=0% quit session when result<0
     %         end
     %     end
     % elseif current_round ~= 1 && used_trial == 1
-    %     pause(1)
+    %     WaitSecs(1)
     %     revalidation(1, eye_used, el, current_round, used_trial);
     % end
     tic;
@@ -151,14 +151,14 @@ while result >=0% quit session when result<0
                 for i=1:EndReward
                     % MarkerWater('Water On')
                     % setDO(4,1);
-                    pause(reward_win);% wait for this drop of water end
+                    WaitSecs(reward_win);% wait for this drop of water end
                     % setDO(4,0);
                     % MarkerWater('Water Off')
-                    pause(0.37);
+                    WaitSecs(0.37);
                 end
                 
                 % ITI_Marker('ITI start');  % add an ITI after a trial  -20231024 lyw
-                % pause(5);
+                % WaitSecs(5);
                 % ITI_Marker('ITI end');
     
                 
@@ -227,7 +227,7 @@ while result >=0% quit session when result<0
                 fprintf('pause 2 minutes, pree G to continue %s\n', datestr(now));
                 kb_time = 120 * 100;
                 while kb_time ~= 0 && ~keyCode(goKey)
-                    pause(0.01)
+                    WaitSecs(0.01)
                     kb_time = kb_time - 1;
                     [~, ~, keyCode] = KbCheck;
                 end
