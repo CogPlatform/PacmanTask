@@ -9,7 +9,7 @@ global idx;
 pacMan.pixel.x = pacMan.pixel.x+pacMan.dir.x;
 pacMan.pixel.y = pacMan.pixel.y+pacMan.dir.y;
 if (pacMan.dir.x==0)&&(pacMan.dir.y==0)
-    idx=idx+1;
+    % idx=idx+1; %comment to cancel the reset of game
 else
     idx=0;
 end

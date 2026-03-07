@@ -9,7 +9,7 @@ rewd.magdot = 3; % frames the reward would last for
 rewd.mageneg = 4;
 if current_round>32
 rewd.magdot = 6; 
-rewd.mageneg = 7; 
+rewd.mageneg = 8; 
 end
 
 rewd.maggoast = 18;

@@ -5,8 +5,13 @@ global gameWindow
 global data;
 global passtrial; % press key 'p' to pass current trial
 global block_num;block_num = 1;
-
+global EndReward;%fyh-after trial give extra reward %modified again by HLK
+if isempty(EndReward)
+	EndReward=0;
+end
 cur_path = cd;
+
+fprintf("===>>> Running main_2025\n");
 
 %% %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%  INIT SESSION
 opts.status.updateStatusToRunning(); % tell cogmoteGO a task is started
@@ -33,17 +38,38 @@ fprintf("\n===>>> Map version is %s\n", opts.mapName)
 result = 0;
 reward_total = 0;
 reward_trial = 0;
-EndReward = 0;
 lazy = 0;
 lazyTrial = 0;
-used_trial = 0;
+used_trial = 1;%modified by ypz
+total_trial = 1; %ypz
+reward_round =0;
+
+%% add code to initialize the current_round (by ypz)
+%%current_round is a persistent value, can retain untill you enter "clear all"
+% Use MATLAB's persistent variables (resets when MATLAB closes)
+persistent stored_round;
+
+if isempty(stored_round)
+	stored_round = 1;
+else
+	stored_round = stored_round + 1;
+end
+
+current_round = stored_round;
 
 %% print correct rate, ljs
+% win=0; totalValid=0; totalAll=0;
+% opts.beginDate = datestr(now,0);
+% begin_time = opts.beginDate;
+% opts.beginTime = GetSecs;
+% opts.rewards = reward_total;
+
+%modified by HLK
 win=0; totalValid=0; totalAll=0;
-opts.beginDate = datestr(now,0);
-begin_time = opts.beginDate;
-opts.beginTime = GetSecs;
-opts.rewards = reward_total;
+begin_time = datestr(now,0);
+opts.beginDate = date;
+opts.beginTime = datestr(now,'HH:MM:SS');
+opts.rewards = reward_round;
 
 %% %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%% MAIN LOOP
 while result >=0  % quit session when result<0
@@ -55,7 +81,7 @@ while result >=0  % quit session when result<0
 	
 	%fyh-change another marker
 	% Marker_reset % 20240107 lyw
-	% Marker(current_round);
+	% Marker(current_round);zzzz
 	% Marker(used_trial);
 	% Marker_reset
 	
@@ -70,7 +96,8 @@ while result >=0  % quit session when result<0
 	texture = Screen('MakeTexture', gameWindow, image);
 	clear image
 
-	opts.startTime = GetSecs;
+	% opts.startTime = GetSecs;
+	opts.startTime = datestr(now,'HH:MM:SS'); %HLK
 
 	%% %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%% RUN TRIAL
 	[result, reward_round, cal, opts] = executeTrial_2025(texture, endDots, opts);
@@ -87,7 +114,6 @@ while result >=0  % quit session when result<0
 			block_num = block_num + 1;
 			if ~passtrial
 				reward_win = rewd.rewardWin * rewd.rewardX;
-				EndReward = 5;%fyh-after trial give extra reward
 				fprintf('reward win is %.2f now\n', reward_win)
 				fprintf('EndReward win is %.2f now\n', EndReward)
 				
@@ -96,16 +122,16 @@ while result >=0  % quit session when result<0
 				fprintf('Monkey drank %.2f seconds water this trial and %.2f seconds in total\n', ...
 					reward_trial/60, reward_total/60)
 				fprintf('Monkey started at %s\n', begin_time)
-				reward_trial = 0;
-				
-				%fyh-change to new water code
-				for i=1:EndReward
-					% MarkerWater('Water On')
-					% setDO(4,1);
-					WaitSecs(reward_win);% wait for this drop of water end
-					% setDO(4,0);
-					% MarkerWater('Water Off')
-					WaitSecs(0.37);
+				reward_trial = 0
+				if EndReward>0 %modified by HLK
+					%fyh-change to new water code
+					for i=1:EndReward
+						WaitSecs(reward_win);% wait for this drop of water end
+						opts.water.giveReward(10,0);%hlk give reward after each success
+						WaitSecs(0.37);
+					end
+				else
+					WaitSecs(2);
 				end
 			else
 				fprintf('Kep Pass\n')
@@ -132,6 +158,7 @@ while result >=0  % quit session when result<0
 				'timestamp', datestr(now, 'yyyy-mm-dd HH:MM:SS'));
 			current_round = current_round + 1;
 			used_trial = 1;
+			total_trial = total_trial + 1;%ypz
 			lazyTrial = 0;
 		case 1 %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%% dead
 			clearData;
@@ -147,6 +174,7 @@ while result >=0  % quit session when result<0
 				'result', result, ...
 				'timestamp', datestr(now, 'yyyy-mm-dd HH:MM:SS'));
 			used_trial = used_trial + 1;
+			total_trial = total_trial + 1;%ypz
 			
 		case 2 %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%% lazy_dead
 			lazy = lazy + 1;
@@ -165,6 +193,7 @@ while result >=0  % quit session when result<0
 				'result', result, ...
 				'timestamp', datestr(now, 'yyyy-mm-dd HH:MM:SS'));
 			used_trial = used_trial + 1;
+			total_trial = total_trial + 1;%ypz
 			if lazyTrial > 10 && ~mod(lazyTrial,10)
 				fprintf('pause 2 minutes, pree G to continue %s\n', datestr(now));
 				kb_time = 120 * 100;
@@ -191,10 +220,12 @@ while result >=0  % quit session when result<0
 			fprintf('Monkey drank %.2f seconds water this trial and %.2f seconds in total\n', ...
 				reward_trial/60, reward_total/60)
 	end
-	% handle used_trial > 99
-	if used_trial == 100
-		result = -2;
-	end
+
+	%comment to cancel the exit of whole program
+	% % handle used_trial > 99
+	% if used_trial == 100
+	% 	result = -2;
+	% end
 	%% %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%% SAVE DATA ON EACH TRIAL
 	save(opts.dataName, 'allGamesData', '-v7.3');
 	fprintf('--->>> Trial %i Data saved to %s\n',used_trial,opts.dataName);
@@ -207,16 +238,28 @@ while result >=0  % quit session when result<0
 	opts.result = result;
 	opts.phase = 1;
 	opts.reactionTime = NaN;
-	opts.correctRate = NaN;
+	opts.correctRate = (current_round-1)/(total_trial-1); %ypz
 	opts.correctRateRecent = NaN;
-	opts.endTime = GetSecs;
+	% opts.endTime = GetSecs;
+	opts.endTime = datestr(now,'HH:MM:SS'); %HLK
+	opts.pertrialtime = opts.endTime - opts.startTime;% ypz
 	broadcastTrial(opts, true);
+
+	% %modified by HLK
+	% opts.trialN = used_trial;
+	% opts.loopN = current_round;
+	% opts.rewards = reward_total;
+	% opts.result = result;
+	% opts.endTime= datestr(now,'HH:MM:SS');
+	% opts.pertrialtime = datetime(opts.endTime, 'InputFormat', 'HH:mm:ss') - datetime(opts.startTime, 'InputFormat', 'HH:mm:ss');
+	% broadcastTrial(opts, true);
 	%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
 
 end
 
 %% %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%% FINAL BROADCAST
-opts.endTime = GetSecs;
+% opts.endTime = GetSecs;
+opts.endTime = datestr(now,'HH:MM:SS');%modified by HLK
 broadcastTrial(opts, false);
 try opts.status.updateStatusToStopped(); end
 

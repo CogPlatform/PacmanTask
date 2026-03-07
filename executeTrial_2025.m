@@ -103,7 +103,7 @@ while gameMap.totalDots>0
         % setDO(4,1);
         % Marker('Water On')
 		if opts.audio && opts.audioBeeps; opts.aM.beep(opts.correctBeep,0.1,0.1); end
-        opts.water.giveReward(opts.rewardTime,0);
+        opts.water.giveReward(10,0);
         reward_count = reward_count - 1;
     else
         % water.stopReward;
@@ -118,7 +118,7 @@ while gameMap.totalDots>0
         if energizer.pointsFramesLeft>0
             for i=1:ghostNumber
                 if (ghosts(i).mode == GHOST_GOING_HOME || ghosts(i).mode == GHOST_ENTERING_HOME)
-                    ghostUpdate(i);
+                    ghostUpdate(i); %ypz_ghoststay
                 end
             end
             energizer.pointsFramesLeft = energizer.pointsFramesLeft-1;
@@ -137,8 +137,8 @@ while gameMap.totalDots>0
     
     if (~skip)
         if ghostNumber>0
-            for i=1:ghostNumber
-                ghostUpdate(i);
+            for i=1:ghostNumber %ypz_ghoststay
+                ghostUpdate(i); %ypz_ghoststay
             end
             if isPacmanCollide()
                 Screen('DrawTexture', gameWindow, texture, [], [], [], 0);
