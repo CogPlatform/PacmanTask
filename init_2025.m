@@ -45,7 +45,7 @@ function opts = init_2025(opts)
 	
 	% open PTB screen
 	PsychImaging('PrepareConfiguration');
-	%PsychImaging('AddTask', 'General', 'UsePanelFitter', fitSize, 'Centered');
+	PsychImaging('AddTask', 'General', 'UsePanelFitter', fitSize, 'Centered');
 	[gameWindow, gameWindowRect] = PsychImaging('OpenWindow', screenNumber, ...
 		[0 0 0], [0,0,gamewindowWidth,gamewindowHeight],[],[],[],[],[],sf);
 	opts.flipInterval = Screen('GetFlipInterval', gameWindow); 

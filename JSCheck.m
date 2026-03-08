@@ -10,7 +10,7 @@ bug = 0;
 if isempty(JS_last_direction)
 	JS_last_direction = 0; % 0 means no direction
 	JS_start_time = GetSecs; % record start time
-	JS_duration_threshold = 0.05; % threshold in seconds, adjustable
+	JS_duration_threshold = 0.15; % threshold in seconds, adjustable
 end
 
 [a,b,c,d]=deal(0);
