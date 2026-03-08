@@ -49,6 +49,7 @@ disp(opts);
 		opts.aM = audioManager('device', opts.audioDevice,...
 		'fileName',fullfile(opts.rootPath, 'explode.mp3'));
 		setup(opts.aM);
+		loadSamples(opts.aM);
 		if opts.audioBeeps; opts.aM.beep(3000,0.1,0.1); end
 	else
 		opts.aM = audioManager('silentMode', true);

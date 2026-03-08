@@ -19,7 +19,7 @@ function opts = init_2025(opts)
 	%% ============================ PTB setup
 	PsychDefaultSetup(2);
 	Screen('Preference', 'VisualDebugLevel', 3);
-	Screen('Preference', 'SkipSyncTests', 1);
+	Screen('Preference', 'SkipSyncTests', 2);
 	
 	% screen setup
 	screenNumber = max( Screen('Screens'));

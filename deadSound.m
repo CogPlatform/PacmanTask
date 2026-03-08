@@ -1,9 +1,8 @@
 function deadSound
-clear
+% use opts.aM to play sound when pacman is dead (does not block like this may), this code should not be used
 % fs=4000;
 % t=5;
 % sound(wgn(fs*t,1,0),fs);
-
 
 filepath = 'explode.mp3';
 [y Fs] = audioread(filepath);

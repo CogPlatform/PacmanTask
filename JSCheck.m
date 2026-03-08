@@ -1,7 +1,8 @@
 function [JSMoved, JSCode, JSVoltage, bug, keyCode] = JSCheck
 global JSup JSdown JSleft JSright up down left right; % trans_data;
 global bug;
-global JS_last_direction JS_start_time JS_duration_threshold;
+persistent JS_last_direction JS_start_time JS_duration_threshold;
+persistent ifdown ifup ifleft ifright;
 
 bug = 0;
 
@@ -9,28 +10,27 @@ bug = 0;
 if isempty(JS_last_direction)
 	JS_last_direction = 0; % 0 means no direction
 	JS_start_time = GetSecs; % record start time
-	JS_duration_threshold = 0.15; % threshold in seconds, adjustable
+	JS_duration_threshold = 0.05; % threshold in seconds, adjustable
 end
 
 [a,b,c,d]=deal(0);
 JSVoltage = [a,b,c,d]; % left, down, right, up
 
-% test:keyboard control
-ifdown = KbName('DownArrow');
-ifup = KbName('UpArrow');
-ifleft = KbName('LeftArrow');
-ifright = KbName('RightArrow');
+if isempty(ifdown) || isempty(ifup) || isempty(ifleft) || isempty(ifright)
+	ifdown = KbName('DownArrow');
+	ifup = KbName('UpArrow');
+	ifleft = KbName('LeftArrow');
+	ifright = KbName('RightArrow');
+end
 
-[~, ~, keyCode] = KbCheck(-1);
+% check keyboard state
+[~, tNow, keyCode] = KbCheck(-1);
 
 % Reset direction states
-down = 0;
-up = 0;
-left = 0;
-right = 0;
+[left,down,right,up]=deal(0);
 
 % Detect current key state
-current_time = GetSecs;
+current_time = tNow;
 current_direction = 0;
 
 if keyCode(ifdown)
