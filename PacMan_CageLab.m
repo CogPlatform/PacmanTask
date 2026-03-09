@@ -47,10 +47,11 @@ disp(opts);
 	if opts.audio
 		%we use audio manager as it stops conflicts with PTB tasks.
 		opts.aM = audioManager('device', opts.audioDevice,...
-		'fileName',fullfile(opts.rootPath, 'explode.mp3'));
+		'fileName',fullfile(opts.rootPath, 'explode.mp3'),...
+		'volumeLevel', opts.audioVolume);
 		setup(opts.aM);
 		loadSamples(opts.aM);
-		if opts.audioBeeps; opts.aM.beep(3000,0.1,0.1); end
+		if opts.audioBeeps; opts.aM.beep(3000,0.1,opts.audioVolume); end
 	else
 		opts.aM = audioManager('silentMode', true);
 	end

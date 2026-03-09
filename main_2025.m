@@ -127,6 +127,7 @@ while result >=0  % quit session when result<0
 					%fyh-change to new water code
 					for i=1:EndReward
 						WaitSecs(reward_win);% wait for this drop of water end
+						if opts.audio && opts.audioBeeps; opts.aM.beep(opts.correctBeep,0.1,opts.audioVolume); end
 						opts.water.giveReward(10,0);%hlk give reward after each success
 						WaitSecs(0.37);
 					end

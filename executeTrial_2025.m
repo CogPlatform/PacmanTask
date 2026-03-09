@@ -102,7 +102,7 @@ while gameMap.totalDots>0
 	if reward_count > 0
 		% setDO(4,1);
 		% Marker('Water On')
-		if opts.audio && opts.audioBeeps; opts.aM.beep(opts.correctBeep,0.1,0.1); end
+		if opts.audio && opts.audioBeeps; opts.aM.beep(opts.correctBeep,0.1,opts.audioVolume); end
 		opts.water.giveReward(10,0);
 		reward_count = reward_count - 1;
 	else
