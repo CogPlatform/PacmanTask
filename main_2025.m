@@ -128,7 +128,7 @@ while result >=0  % quit session when result<0
 					for i=1:EndReward
 						WaitSecs(reward_win);% wait for this drop of water end
 						if opts.audio && opts.audioBeeps; opts.aM.beep(opts.correctBeep,0.1,opts.audioVolume); end
-						opts.water.giveReward(10,0);%hlk give reward after each success
+						opts.water.giveReward(opts.rewardTime);%hlk give reward after each success
 						WaitSecs(0.37);
 					end
 				else
@@ -222,11 +222,7 @@ while result >=0  % quit session when result<0
 				reward_trial/60, reward_total/60)
 	end
 
-	%comment to cancel the exit of whole program
-	% % handle used_trial > 99
-	% if used_trial == 100
-	% 	result = -2;
-	% end
+	
 	%% %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%% SAVE DATA ON EACH TRIAL
 	save(opts.dataName, 'allGamesData', '-v7.3');
 	fprintf('--->>> Trial %i Data saved to %s\n',used_trial,opts.dataName);
@@ -246,6 +242,12 @@ while result >=0  % quit session when result<0
 	opts.pertrialtime = opts.endTime - opts.startTime;% ypz
 	broadcastTrial(opts, true);
 
+	%% ================================== check if a command was sent from control system
+	[opts, keepRunning] = clutil.checkMessages(opts);
+	if ~keepRunning || used_trial > opts.totalRewards
+		result = -1; % set result to -2 to end session
+	end
+
 	% %modified by HLK
 	% opts.trialN = used_trial;
 	% opts.loopN = current_round;
@@ -264,14 +266,24 @@ opts.endTime = datestr(now,'HH:MM:SS');%modified by HLK
 broadcastTrial(opts, false);
 try opts.status.updateStatusToStopped(); end
 
+%% %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%% FINAL DATA SAVE, include opts
+save(opts.dataName, 'allGamesData', 'opts', '-v7.3');
+fprintf('#####################\n≣≣≣≣ <strong>SAVED RAW DATA to: %s</strong>\n#####################\n', opts.dataName)
+
+tmp.alyx = opts.alyx; tmp.zmq = opts.zmq;
+j = "[]"; % default empty json
+try
+	j = jsonencode(opts);
+	writelines(j, opts.jsonName, WriteMode="overwrite");
+	fprintf('#####################\n≣≣≣≣ <strong>SAVED JSON DATA to: %s</strong>\n#####################\n', opts.jsonName)
+end
+
 %% %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%% USE ALYX TO SAVE DATA
 %  Send data to Alyx if enabled
 if opts.useAlyx
-	%opts.session.dataBucket = 'Minio-TianMingLab';
-	%opts.session.dataRepo = 'http://172.16.102.77:9000';
 	[opts.session, success] = clutil.initAlyxSession(opts, opts.session);
 	if success
-		opts.session = clutil.endAlyxSession(opts, opts.session, "PASS");
+		opts.session = clutil.endAlyxSession(opts, opts.session, "PASS", opts.trialN, current_round, j);
 	end
 end
 

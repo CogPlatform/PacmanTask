@@ -9,6 +9,13 @@ disp(opts);
 	%% =========================== initial config for PTB
 	PsychDefaultSetup(2);
 
+	%% ==========================================
+	% CageLab uses several class objects to communicate
+	% opts.alyx = alyxManager talks to alyx database, configures save filenames
+	% opts.status = cogmoteGO status (running or not) update
+	% opts.broadcast = cogmoteGO broadcast latest trial data
+	% opts.zmq = communicate directly to cogmoteGO, get commands from remote control PC
+
 	%% =========================== ALF file paths
 	% we use alyxManager to identify the proper save path
 	% ALF file paths compatible with Alyx database
@@ -23,6 +30,7 @@ disp(opts);
 	[opts.alyxPath, opts.sessionID, opts.dateID, opts.ALFName] = opts.alyx.getALF(...
 		opts.session.subjectName, opts.session.labName, true);
 	opts.dataName = [opts.alyxPath filesep 'matlab.raw.pacman.' opts.ALFName '.mat'];
+	opts.jsonName = [opts.alyxPath filesep 'opticka.details.pacman.' opts.ALFName '.json'];
 	
 	%% =========================== Set up other paths
 	% additional paths, diary is saved to ALF path too
@@ -69,6 +77,7 @@ disp(opts);
 
 	%% =========================== messaging setup
 	if ~opts.remote
+		% we don't need zmq, set to empty
 		opts.zmq = [];
 	end
 

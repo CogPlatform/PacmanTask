@@ -37,7 +37,6 @@ global lj_Alpha;
 %fyh-incage pump
 % global water;
 
-
 %%
 initData;
 rt = 0;
@@ -103,7 +102,7 @@ while gameMap.totalDots>0
 		% setDO(4,1);
 		% Marker('Water On')
 		if opts.audio && opts.audioBeeps; opts.aM.beep(opts.correctBeep,0.1,opts.audioVolume); end
-		opts.water.giveReward(10,0);
+		opts.water.giveReward(opts.rewardTime);
 		reward_count = reward_count - 1;
 	else
 		% water.stopReward;
@@ -241,6 +240,7 @@ while gameMap.totalDots>0
 			break
 		elseif keyCode(escapeKey)%esc
 			[vbl,~,flip,miss] = Screen('Flip', gameWindow, vbl+(1-0.5)*ifi);
+			keepRunning = false;
 			% Eyelink('message','Key pass');
 			% Marker('Key pass');
 			% setDO(4,0);
@@ -395,7 +395,7 @@ if ~passtrial
 		end
 		
 	elseif gameMap.totalDots == endDots
-%     elseif ghosts(i).mode == GHOST_GOING_HOME
+		%elseif ghosts(i).mode == GHOST_GOING_HOME
 		result = 0; % success!
 		Screen('Flip', gameWindow);
 		% Eyelink('message','Trial End');
@@ -403,6 +403,7 @@ if ~passtrial
 
 	else
 		result = -1; % ESC pressed, quit session
+		keepRunning = false;
 		Screen('Flip', gameWindow);
 		WaitSecs(1)
 		% Eyelink('message','Trial End');
