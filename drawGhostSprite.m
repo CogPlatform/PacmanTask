@@ -2,6 +2,10 @@ function drawGhostSprite(window,x,y,frame,dirEnum,scared,flash,eyes_only,color)
     
     global DIR_UP DIR_RIGHT DIR_DOWN DIR_LEFT scale;
     global DIR_STAY;%fyh
+	global xShift yShift
+
+	x = x + xShift; %centered on the screen
+	y = y + yShift; %centered on the screen
     
     x=x-6*scale;
     y=y-6.5*scale;

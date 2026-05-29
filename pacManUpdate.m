@@ -1,6 +1,6 @@
 function pacManUpdate
 
-global pacMan tileSize gameMap rewd
+global pacMan tileSize midTile gameMap rewd
 global DIR_UP DIR_RIGHT DIR_DOWN DIR_LEFT;
 global JSMoved JSCode JSup JSdown JSleft JSright;
 global idx;
@@ -17,8 +17,8 @@ end
 pacMan.tile.x = floor(pacMan.pixel.x / tileSize)+1;
 pacMan.tile.y = floor(pacMan.pixel.y / tileSize)+1;
 %detect if pacman is in the middle of a tile
-pacMan.distToMid.x = (pacMan.tile.x-1)*tileSize+floor(tileSize/2) - pacMan.pixel.x;%origin tileSize=25,*25+12
-pacMan.distToMid.y = (pacMan.tile.y-1)*tileSize+floor(tileSize/2) - pacMan.pixel.y;
+pacMan.distToMid.x = (pacMan.tile.x-1)*tileSize+midTile.x - pacMan.pixel.x;%origin tileSize=25,*25+12
+pacMan.distToMid.y = (pacMan.tile.y-1)*tileSize+midTile.y - pacMan.pixel.y;
 pacMan.frames = pacMan.frames + 1;
 
 t = getTile(pacMan.tile.x,pacMan.tile.y);

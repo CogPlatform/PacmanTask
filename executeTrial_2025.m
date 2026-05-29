@@ -66,7 +66,7 @@ drawCost = 0;
 flipCost = 0;
 ghostUpCost = 0;
 pacManUpCost = 0;
-Screen('DrawTexture', gameWindow, texture, [], [], [], 0);
+Screen('DrawTexture', gameWindow, texture, [], opts.mapRect);
 drawRewards(fruit_pos);
 if ghostNumber>0
 	for i=1:ghostNumber
@@ -77,40 +77,32 @@ if ghostNumber>0
 			ghosts(i).color);
 	end
 end
-drawPlayer;
-ifi = Screen('GetFlipInterval', gameWindow);
-%fyh
-% setDO(4,0);
-% Marker('Water Off')
-%% Flip the first frame
-[JSMoved, JSCode, JSVoltage] = JSCheck;
+drawPacmanSprite(gameWindow, pacMan.pixel.x, pacMan.pixel.y, pacMan.dirEnum,...
+	330-mod(floor(pacMan.frames/4),2)*30, pacMan.color);
+
+ifi = flipInterval;
+halfifi = ifi / 2;
+JSCheck();
 [vbl,~,flip,miss] = Screen('Flip', gameWindow);
-%fyh
-% Eyelink('message','Trial Start');
-% Marker('Trial Start');
-datasaving(timestep,JSVoltage,reward_round,ifi,vbl,flip,miss,fps,CodeCost, ...
+
+datasaving(timestep,[0,0,0,0],reward_round,ifi,vbl,flip,miss,fps,CodeCost, ...
 	JSCost,DSCost,rewardCost,drawCost,flipCost,ghostUpCost,pacManUpCost);
 
 %% %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
-while gameMap.totalDots>0
+%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+while gameMap.totalDots > 0
 	%%  give reward -fyh change to incage type
 	rewardStart = GetSecs();
 	reward_count = reward_count + rewd.numdot + rewd.numgoast + rewd.numeneg;
 	reward_round = reward_round + rewd.numdot + rewd.numgoast + rewd.numeneg;
 	reward_reset;
 	if reward_count > 0
-		% setDO(4,1);
-		% Marker('Water On')
 		if opts.audio && opts.audioBeeps; opts.aM.beep(opts.correctBeep,0.1,opts.audioVolume); end
 		opts.water.giveReward(opts.rewardTime);
 		reward_count = reward_count - 1;
-	else
-		% water.stopReward;
-		% setDO(4,0);
-		% Marker('Water Off')
 	end
 	rewardEnd = GetSecs();
-	rewardCost = GetSecs() - rewardStart;
+	rewardCost = rewardEnd - rewardStart;
 	%%
 	skip = 0;
 	if ghostNumber>0
@@ -122,8 +114,6 @@ while gameMap.totalDots>0
 			end
 			energizer.pointsFramesLeft = energizer.pointsFramesLeft-1;
 			skip = 1;
-			%             show_online('dead2')
-			
 		elseif ghostActive % make ghosts go home immediately after points disappear
 			for i=1:ghostNumber
 				if (ghosts(i).mode == GHOST_EATEN)
@@ -139,8 +129,8 @@ while gameMap.totalDots>0
 			for i=1:ghostNumber %ypz_ghoststay
 				ghostUpdate(i); %ypz_ghoststay
 			end
-			if isPacmanCollide()
-				Screen('DrawTexture', gameWindow, texture, [], [], [], 0);
+			if isPacmanCollide() %%%%%% PACMAN COLLISION CHECKED HERE
+				Screen('DrawTexture', gameWindow, texture, [], opts.mapRect);
 				drawRewards(fruit_pos);
 				if ghostNumber>0
 					for i=1:ghostNumber
@@ -151,19 +141,12 @@ while gameMap.totalDots>0
 							ghosts(i).color);
 					end
 				end
-				drawPlayer;
-				[vbl,~,flip,miss] = Screen('Flip', gameWindow, vbl+(1-0.5)*ifi);
+				drawPacmanSprite(gameWindow, pacMan.pixel.x, pacMan.pixel.y, pacMan.dirEnum,...
+					330-mod(floor(pacMan.frames/4),2)*30, pacMan.color);
+				[vbl,~,flip,miss] = Screen('Flip', gameWindow, vbl+halfifi);
 				if pacMan.pixel.x == 337 && pacMan.pixel.y == 662
-					% Eyelink('message','Pacman no move');
-					% Marker('Pacman no move');
 					rt = 1;
-				else
-					% Eyelink('message','Pacman Dead');
-					% Marker('Pacman Dead');
 				end
-				
-				% setDO(4,0);
-				% Marker('Water Off')
 				if opts.audio; opts.aM.play; end
 				dead = 1;
 				WaitSecs(opts.timeOut);
@@ -173,14 +156,13 @@ while gameMap.totalDots>0
 		end
 		
 		%%
-		ghostUpCost = GetSecs() - rewardEnd;
 		ghostUpEnd = GetSecs();
-		pacManUpdate;
+		ghostUpCost = ghostUpEnd - rewardEnd;
+		pacManUpdate();
 		pacManUpCost = GetSecs() - ghostUpEnd;
-		updateEnergizer;
-		if gameMap.totalDots == endDots
-%           if ghosts(i).mode == GHOST_GOING_HOME
-			Screen('DrawTexture', gameWindow, texture, [], [], [], 0);
+		updateEnergizer();
+		if gameMap.totalDots == endDots %%%%% FINISH TRIAL CHECKED HERE
+			Screen('DrawTexture', gameWindow, texture, [], opts.mapRect);
 			drawRewards(fruit_pos);
 			if ghostNumber>0
 				for i=1:ghostNumber
@@ -191,16 +173,15 @@ while gameMap.totalDots>0
 						ghosts(i).color);
 				end
 			end
-			drawPlayer;
-			[vbl,~,flip,miss] = Screen('Flip', gameWindow, vbl+(1-0.5)*ifi);
-			% Eyelink('message','Finish trial');
-			% Marker('Finish trial');
+			drawPacmanSprite(gameWindow, pacMan.pixel.x, pacMan.pixel.y, pacMan.dirEnum,...
+				330-mod(floor(pacMan.frames/4),2)*30, pacMan.color);
+			[vbl,~,flip,miss] = Screen('Flip', gameWindow, vbl+halfifi);
 			break
 		end
 		
 		
 		if idx>deadline  % if pacman do not move over 900 frames, pacman will die.
-			Screen('DrawTexture', gameWindow, texture, [], [], [], 0);
+			Screen('DrawTexture', gameWindow, texture, [], opts.mapRect);
 			drawRewards(fruit_pos);
 			if ghostNumber>0
 				for i=1:ghostNumber
@@ -211,69 +192,20 @@ while gameMap.totalDots>0
 						ghosts(i).color);
 				end
 			end
-			drawPlayer;
-			[vbl,~,flip,miss] = Screen('Flip', gameWindow, vbl+(1-0.5)*ifi);
-			% Eyelink('message','Pacman no move');
-			% Marker('Pacman no move');
+			drawPacmanSprite(gameWindow, pacMan.pixel.x, pacMan.pixel.y, pacMan.dirEnum,...
+				330-mod(floor(pacMan.frames/4),2)*30, pacMan.color);
+			[vbl,~,flip,miss] = Screen('Flip', gameWindow, vbl+halfifi);
 			rt = 1;
-			% setDO(4,0);
-			% Marker('Water Off')
 			opts.aM.play();
 			dead=1;
 			idx=0;
 			WaitSecs(5);
 			break;
 		end
-		%% key operation
-		% stop & resume operation
-		if keyCode(pauseKey)%press key's' to resume
-			[vbl,~,flip,miss] = Screen('Flip', gameWindow, vbl+(1-0.5)*ifi);
-			% Eyelink('message','Key Pause');
-			% Marker('Key Pause');
-			% setDO(4,0);
-			% Marker('Water Off')
-			answer = input('resume? ', 's');
-			while answer ~= 's'
-				answer = input('resume? ', 's');
-			end
-			dead = 1;
-			break
-		elseif keyCode(escapeKey)%esc
-			[vbl,~,flip,miss] = Screen('Flip', gameWindow, vbl+(1-0.5)*ifi);
-			keepRunning = false;
-			% Eyelink('message','Key pass');
-			% Marker('Key pass');
-			% setDO(4,0);
-			% Marker('Water Off')
-			break
-		elseif keyCode(key_pass)  %press key 'p' to pass current trial  ---hy 20170328
-			[vbl,~,flip,miss] = Screen('Flip', gameWindow, vbl+(1-0.5)*ifi);
-			% Eyelink('message','Key pass');
-			% Marker('Key pass');
-			% setDO(4,0);
-			% Marker('Water Off')
-			passtrial=1;
-			break
-		elseif keyCode(calKey)
-			[vbl,~,flip,miss] = Screen('Flip', gameWindow, vbl+(1-0.5)*ifi);
-			% Eyelink('message','Key Pause');
-			% Marker('Key Pause');
-			% setDO(4,0);
-			% Marker('Water Off')
-			dead = 1;
-			cal = 1;
-			break
-		elseif keyCode(change_block)
-			[vbl,~,flip,miss] = Screen('Flip', gameWindow, vbl+(1-0.5)*ifi);
-			% setDO(4,0);
-			ch_block = 1;
-			passtrial=1;
-			break
-		end
 	end
 	%% draw everything
 	drawStart = GetSecs();
-	Screen('DrawTexture', gameWindow, texture, [], [], [], 0);
+	Screen('DrawTexture', gameWindow, texture, [], opts.mapRect);
 	drawRewards(fruit_pos);
 	if ghostNumber>0
 		for i=1:ghostNumber
@@ -284,7 +216,8 @@ while gameMap.totalDots>0
 				ghosts(i).color);
 		end
 	end
-	drawPlayer;
+	drawPacmanSprite(gameWindow, pacMan.pixel.x, pacMan.pixel.y, pacMan.dirEnum,...
+		330-mod(floor(pacMan.frames/4),2)*30, pacMan.color);
 	Screen('DrawingFinished', gameWindow);
 	drawEnd = GetSecs();
 	drawCost = drawEnd - drawStart;
@@ -292,23 +225,37 @@ while gameMap.totalDots>0
 	timestep = timestep + 1;
 	%% Flip
 	VBL = GetSecs();
-	[vbl,~,flip,miss] = Screen('Flip', gameWindow, vbl+(1-0.5)*ifi);
-%     tmp = Screen('GetImage',gameWindow);
-%     imwrite(tmp,'/home/pacman/Desktop/screenshot/test5.png')
+	[vbl,~,flip,miss] = Screen('Flip', gameWindow, vbl+halfifi);
 
-	% Eyelink('message',sprintf('Frame: %d', timestep));%fyh-%
-   
-	% eyelink message must just after Screen('Flip')
-	%fyh
-	% if mod(timestep,2)
-	%     lj_Alpha.toggleFIO(5)
-	%     lj_Alpha.setFIO(1,7)
-	%     lj_Alpha.setFIO(0,7)
-	% else
-	%     lj_Alpha.toggleFIO(6)
-	%     lj_Alpha.setFIO(1,7)
-	%     lj_Alpha.setFIO(0,7)
-	% end
+	%% key operation
+	% stop & resume operation
+	if keyCode(pauseKey)%press key's' to resume
+		[vbl,~,flip,miss] = Screen('Flip', gameWindow, vbl+halfifi);
+		answer = input('resume? ', 's');
+		while answer ~= 's'
+			answer = input('resume? ', 's');
+		end
+		dead = 1;
+		break
+	elseif keyCode(escapeKey)%esc
+		[vbl,~,flip,miss] = Screen('Flip', gameWindow, vbl+halfifi);
+		keepRunning = false;
+		break
+	elseif keyCode(key_pass)  %press key 'p' to pass current trial  ---hy 20170328
+		[vbl,~,flip,miss] = Screen('Flip', gameWindow, vbl+halfifi);
+		passtrial=1;
+		break
+	elseif keyCode(calKey)
+		[vbl,~,flip,miss] = Screen('Flip', gameWindow, vbl+halfifi);
+		dead = 1;
+		cal = 1;
+		break
+	elseif keyCode(change_block)
+		[vbl,~,flip,miss] = Screen('Flip', gameWindow, vbl+halfifi);
+		ch_block = 1;
+		passtrial=1;
+		break
+	end
 	
 	%% print time cost and fps
 	Flip = GetSecs();
@@ -325,7 +272,7 @@ while gameMap.totalDots>0
 	end
 	start = GetSecs();
 	%%
-	[JSMoved, JSCode, JSVoltage, bug, keyCode] = JSCheck;
+	[JSMoved, JSCode, JSVoltage, bug, keyCode] = JSCheck();
 	JSCheckTime = GetSecs();
 	bugall = bug + bugall;
 	%%  save data / modified by ljs 2019.11.01
@@ -338,10 +285,9 @@ end
 timestep = timestep + 1;
 datasaving(timestep,JSVoltage,reward_round,ifi,vbl,flip,miss,fps,CodeCost, ...
 	JSCost,DSCost,rewardCost,drawCost,flipCost,ghostUpCost,pacManUpCost);
-fprintf('%d frames in total have miss or fps larger than 64\n', frame_d)
-% if timestep >= 20000
-%     error('should change preallocation of data in initData')
-% end
+fprintf('===>>>%d frames in total have miss or fps larger than 64\n', frame_d)
+fprintf('===>>>Last CodeCost: %.3f ms, JSCost: %.3f ms, DSCost: %.3f ms, drawCost: %.3f ms, flipCost: %.3f ms, ghostUpCost: %.3f ms, pacManUpCost: %.3f ms\n', ...
+	CodeCost*1000, JSCost*1000, DSCost*1000, drawCost*1000, flipCost*1000, ghostUpCost*1000, pacManUpCost*1000);
 if bugall
 	fprintf('%d frames in total have two directions at the same time\n', bugall)
 end
@@ -352,9 +298,10 @@ if ~passtrial
 	if dead==1
 		% draw dying pacman
 		for i = 1:30
-			Screen('DrawTexture', gameWindow, texture);
+			Screen('DrawTexture', gameWindow, texture, [], opts.mapRect);
 			drawRewards(fruit_pos);
-			drawPlayer;
+			drawPacmanSprite(gameWindow, pacMan.pixel.x, pacMan.pixel.y, pacMan.dirEnum,...
+				330-mod(floor(pacMan.frames/4),2)*30, pacMan.color);
 			for j=1:ghostNumber
 				ghosts(j).frames = ghosts(j).frames + 1;
 				drawGhostSprite(gameWindow, ghosts(j).pixel.x, ghosts(j).pixel.y, ...
@@ -367,14 +314,14 @@ if ~passtrial
 		end
 		
 		for angle = 330-mod(floor(pacMan.frames/4),2)*30:-10:0
-			Screen('DrawTexture', gameWindow, texture);
+			Screen('DrawTexture', gameWindow, texture, [], opts.mapRect);
 			drawRewards(fruit_pos);
 			drawPacmanSprite(gameWindow,pacMan.pixel.x,pacMan.pixel.y,pacMan.dirEnum, angle, pacMan.color);
 			Screen('Flip', gameWindow);
 		end
 		
 		for size = 1:tileSize*0.9
-			Screen('DrawTexture', gameWindow, texture);
+			Screen('DrawTexture', gameWindow, texture, [], opts.mapRect);
 			drawRewards(fruit_pos);
 			rect = [pacMan.pixel.x-size pacMan.pixel.y-size pacMan.pixel.x+size pacMan.pixel.y+size];
 			if ~mod(size-1,3)

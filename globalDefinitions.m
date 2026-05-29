@@ -1,10 +1,10 @@
- global scale;
+global scale;
 
 %size of a square tile in pixels
 global tileSize;
 
 %the center pixel of a tile
-global midTile; 
+global midTile;
 
 global maxCols; maxCols = 28;
 global maxRows; maxRows = 36;
@@ -21,6 +21,8 @@ global DIR_RIGHT; DIR_RIGHT = 3;
 
 global mapWidth; 
 global mapHeight; 
+global xShift;
+global yShift;
 
 global gameScreenWidth; 
 global gameScreenHeight; 
@@ -92,6 +94,7 @@ global rewd
 global reward_count
 
 % keyboard
+KbName('UnifyKeyNames');
 global keyDown;
 global keyCode;
 global upKey;    upKey = KbName('UpArrow');
@@ -106,8 +109,3 @@ global JSleft; JSleft = 3;
 global JSright; JSright = 4;
 global JSMoved JSCode;
 
-% system
-global topPriorityLevel OldPriority;
-
-% online control 
-% global ol_info_win % online information window  -- 20170119 lzq

@@ -16,9 +16,5 @@ function drawgrid
     
     penWid = 2;
     Screen('FrameRect',gameWindow,[0.5,0.2,0.2],alre,penWid);
-%     Screen('Flip',gameWindow); 
-    
-
-
 end
     

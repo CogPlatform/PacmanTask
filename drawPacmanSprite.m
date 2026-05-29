@@ -1,6 +1,10 @@
 function drawPacmanSprite(window,x,y,dirEnum,angle,color)
 
     global DIR_UP DIR_RIGHT DIR_DOWN DIR_LEFT scale tileSize;
+	global xShift yShift
+
+	x = x + xShift;
+	y = y + yShift;
     
     w = tileSize*0.9;
     

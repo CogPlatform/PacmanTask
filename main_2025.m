@@ -57,44 +57,33 @@ end
 
 current_round = stored_round;
 
-%% print correct rate, ljs
-% win=0; totalValid=0; totalAll=0;
-% opts.beginDate = datestr(now,0);
-% begin_time = opts.beginDate;
-% opts.beginTime = GetSecs;
-% opts.rewards = reward_total;
-
 %modified by HLK
 win=0; totalValid=0; totalAll=0;
 begin_time = datestr(now,0);
 opts.beginDate = date;
 opts.beginTime = datestr(now,'HH:MM:SS');
 opts.rewards = reward_round;
+texture = -1;
 
 %% %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%% MAIN LOOP
 while result >=0  % quit session when result<0
 %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
 
 	%% main part
-	fprintf('====================\n')
-	fprintf('%d-%d\n', current_round, used_trial)
-	
-	%fyh-change another marker
-	% Marker_reset % 20240107 lyw
-	% Marker(current_round);zzzz
-	% Marker(used_trial);
-	% Marker_reset
+	t = sprintf('===>>>==============current_round-used_trial\n%d-%d', current_round, used_trial);
+	addMessage(opts.tL, 0, [], [], t); disp(t);
 	
 	rewardSet;
 	rewd.rewardWin = 0.1;
 	rewd.rewardX = 1;
 	
 	endDots = 0;%trial end when no dots on the map
-	initTrialDG(opts, result);
+	opts = initTrialDG(opts, result);
 	
-	image = drawMap;
-	texture = Screen('MakeTexture', gameWindow, image);
-	clear image
+	if ~isnan(texture) && Screen(texture, 'WindowKind') == -1
+		try Screen('Close',texture); end
+	end
+	texture = drawMap(opts);
 
 	% opts.startTime = GetSecs;
 	opts.startTime = datestr(now,'HH:MM:SS'); %HLK
@@ -114,15 +103,16 @@ while result >=0  % quit session when result<0
 			block_num = block_num + 1;
 			if ~passtrial
 				reward_win = rewd.rewardWin * rewd.rewardX;
-				fprintf('reward win is %.2f now\n', reward_win)
-				fprintf('EndReward win is %.2f now\n', EndReward)
+				t = sprintf('reward win is %.2f now -- EndReward win is %.2f now', reward_win, EndReward);
+				addMessage(opts.tL, 0, [], [], t); disp(t);
 				
 				reward_total = reward_total + EndReward * (60 * reward_win);
 				reward_trial = reward_trial + EndReward * (60 * reward_win);
-				fprintf('Monkey drank %.2f seconds water this trial and %.2f seconds in total\n', ...
-					reward_trial/60, reward_total/60)
-				fprintf('Monkey started at %s\n', begin_time)
-				reward_trial = 0
+				t= sprintf('Monkey drank %.2f seconds water this trial and %.2f seconds in total \nMonkey started at %s', ...
+					reward_trial/60, reward_total/60, begin_time);
+				addMessage(opts.tL, 0, [], [], t); disp(t);
+				
+				reward_trial = 0;
 				if EndReward>0 %modified by HLK
 					%fyh-change to new water code
 					for i=1:EndReward
@@ -136,17 +126,18 @@ while result >=0  % quit session when result<0
 				end
 			else
 				fprintf('Kep Pass\n')
-				fprintf('Monkey drank %.2f seconds water this trial and %.2f seconds in total\n', ...
-					reward_trial/60, reward_total/60)
-				fprintf('Monkey started at %s\n', begin_time)
+				t= sprintf('Monkey drank %.2f seconds water this trial and %.2f seconds in total \nMonkey started at %s', ...
+					reward_trial/60, reward_total/60, begin_time);
+				addMessage(opts.tL, 0, [], [], t); disp(t);
 				totalValid = totalValid - used_trial;
 				reward_trial = 0;
 			end
 	
-			fprintf('win = %d, lazy = %d, corr_rate = %f, all_valid = %d, all = %d\n', ...
-				win, lazy, win/(totalAll-lazy), totalValid, totalAll);
 			clearData;
 			gameID = sprintf('game_%d_%d', current_round, used_trial);
+			t = sprintf('win = %d, lazy = %d, corr_rate = %f, all_valid = %d, all = %d, gameID = %s', ...
+				win, lazy, win/(totalAll-lazy), totalValid, totalAll, gameID);
+			addMessage(opts.tL, 0, [], [], t); disp(t);
 		
 			% 将当前游戏数据存储为结构体字段
 			allGamesData.(gameID) = data;
@@ -156,7 +147,11 @@ while result >=0  % quit session when result<0
 				'round', current_round, ...
 				'trial', used_trial, ...
 				'result', result, ...
-				'timestamp', datestr(now, 'yyyy-mm-dd HH:MM:SS'));
+				'timestamp', datestr(now, 'yyyy-mm-dd HH:MM:SS'), ...
+				'lazyTrial', lazyTrial, ...
+				'lazy', lazy, ...
+				'reward_trial', reward_trial, ...
+				'reward_total', reward_total);
 			current_round = current_round + 1;
 			used_trial = 1;
 			total_trial = total_trial + 1;%ypz
@@ -173,7 +168,11 @@ while result >=0  % quit session when result<0
 				'round', current_round, ...
 				'trial', used_trial, ...
 				'result', result, ...
-				'timestamp', datestr(now, 'yyyy-mm-dd HH:MM:SS'));
+				'timestamp', datestr(now, 'yyyy-mm-dd HH:MM:SS'), ...
+				'lazyTrial', lazyTrial, ...
+				'lazy', lazy, ...
+				'reward_trial', reward_trial, ...
+				'reward_total', reward_total);
 			used_trial = used_trial + 1;
 			total_trial = total_trial + 1;%ypz
 			
@@ -192,11 +191,15 @@ while result >=0  % quit session when result<0
 				'round', current_round, ...
 				'trial', used_trial, ...
 				'result', result, ...
-				'timestamp', datestr(now, 'yyyy-mm-dd HH:MM:SS'));
+				'timestamp', datestr(now, 'yyyy-mm-dd HH:MM:SS'), ...
+				'lazyTrial', lazyTrial, ...
+				'lazy', lazy, ...
+				'reward_trial', reward_trial, ...
+				'reward_total', reward_total);
 			used_trial = used_trial + 1;
 			total_trial = total_trial + 1;%ypz
 			if lazyTrial > 10 && ~mod(lazyTrial,10)
-				fprintf('pause 2 minutes, pree G to continue %s\n', datestr(now));
+				fprintf('pause 2 minutes, press G to continue %s\n', datestr(now));
 				kb_time = 120 * 100;
 				while kb_time ~= 0 && ~keyCode(goKey)
 					WaitSecs(0.01)
@@ -217,7 +220,11 @@ while result >=0  % quit session when result<0
 				'round', current_round, ...
 				'trial', used_trial, ...
 				'result', result, ...
-				'timestamp', datestr(now, 'yyyy-mm-dd HH:MM:SS'));
+				'timestamp', datestr(now, 'yyyy-mm-dd HH:MM:SS'), ...
+				'lazyTrial', lazyTrial, ...
+				'lazy', lazy, ...
+				'reward_trial', reward_trial, ...
+				'reward_total', reward_total);
 			fprintf('Monkey drank %.2f seconds water this trial and %.2f seconds in total\n', ...
 				reward_trial/60, reward_total/60)
 	end
@@ -239,30 +246,22 @@ while result >=0  % quit session when result<0
 	opts.correctRateRecent = NaN;
 	% opts.endTime = GetSecs;
 	opts.endTime = datestr(now,'HH:MM:SS'); %HLK
-	opts.pertrialtime = opts.endTime - opts.startTime;% ypz
+	opts.pertrialtime = datetime(opts.endTime, 'InputFormat', 'HH:mm:ss') - datetime(opts.startTime, 'InputFormat', 'HH:mm:ss');% ypz
 	broadcastTrial(opts, true);
 
 	%% ================================== check if a command was sent from control system
 	[opts, keepRunning] = clutil.checkMessages(opts);
+
 	if ~keepRunning || used_trial > opts.totalRewards
 		result = -1; % set result to -2 to end session
 	end
-
-	% %modified by HLK
-	% opts.trialN = used_trial;
-	% opts.loopN = current_round;
-	% opts.rewards = reward_total;
-	% opts.result = result;
-	% opts.endTime= datestr(now,'HH:MM:SS');
-	% opts.pertrialtime = datetime(opts.endTime, 'InputFormat', 'HH:mm:ss') - datetime(opts.startTime, 'InputFormat', 'HH:mm:ss');
-	% broadcastTrial(opts, true);
-	%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
 
 end
 
 %% %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%% FINAL BROADCAST
 % opts.endTime = GetSecs;
 opts.endTime = datestr(now,'HH:MM:SS');%modified by HLK
+opts.pertrialtime = datetime(opts.endTime, 'InputFormat', 'HH:mm:ss') - datetime(opts.startTime, 'InputFormat', 'HH:mm:ss');% ypz
 broadcastTrial(opts, false);
 try opts.status.updateStatusToStopped(); end
 
@@ -293,9 +292,7 @@ sca;
 Priority(0);
 
 %% last print
-fprintf('Monkey started at %s\n', opts.beginTime)
-fprintf('win = %d, lazy = %d, corr_rate = %f, all_valid = %d, all = %d\n', ...
-	win, lazy, win/totalValid, totalValid, totalAll);
+fprintf('Monkey started at %s\nwin = %d, lazy = %d, corr_rate = %f, all_valid = %d, all = %d\n', opts.beginTime, win, lazy, win/totalValid, totalValid, totalAll);
 
 cd(cur_path);
 clear -global lj

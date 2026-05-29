@@ -1,10 +1,8 @@
 function opts = init_2025(opts)
-	% Create a gameWindow
+	% Create a PTB gameWindow
 
 	%% =========================== globals 
 	globalDefinitions;
-	global gameWindow tileSize scale;
-	sca;
 	
 	%% =========================== debug mode?
 	sf = []; windowed = [];
@@ -12,7 +10,7 @@ function opts = init_2025(opts)
 		if IsLinux || IsOSX
 			sf = kPsychGUIWindow; windowed = [0 0 1920 1080]; 
 		else
-			PsychDebugWindowConfiguration;
+			PsychDebugWindowConfiguration; %for windows, kPsychGUIWindow is better
 		end
 	end
 	
@@ -22,8 +20,7 @@ function opts = init_2025(opts)
 	Screen('Preference', 'SkipSyncTests', 2);
 	
 	% screen setup
-	screenNumber = max( Screen('Screens'));
-	[gamewindowWidth, gamewindowHeight] = Screen('WindowSize', screenNumber);
+	[gamewindowWidth, gamewindowHeight] = Screen('WindowSize', opts.screen);
 	
 	% should be 1920 x 1080
 	if gamewindowWidth ~= 1920 || gamewindowHeight ~= 1080
@@ -34,24 +31,31 @@ function opts = init_2025(opts)
 	end
 	
  	% so the tile size will be 25(everything depends on it)
-	tileSize = ceil(gamewindowHeight / 44.125/2)*2-1;          %lzq
-	midTile = struct('x',floor(tileSize/2),'y',floor(tileSize/2));
+	tileSize = ceil( gamewindowHeight / 44.125 / 2 ) * 2 - 1;          %lzq
+	midTile = struct( 'x', tileSize / 2, 'y', tileSize / 2 );
 	scale = tileSize / 8.0;
 	mapWidth = maxCols*tileSize;
 	mapHeight = maxRows*tileSize;
-	gameScreenWidth = mapWidth;
-	gameScreenHeight = mapHeight;
-	fitSize = [gameScreenWidth, gameScreenHeight];
-	
+	xShift = (gamewindowWidth - mapWidth) / 2; %shift to the middle of the screen
+	yShift = (gamewindowHeight - mapHeight) / 2; %shift to the middle of the screen
+
 	% open PTB screen
 	PsychImaging('PrepareConfiguration');
-	PsychImaging('AddTask', 'General', 'UsePanelFitter', fitSize, 'Centered');
-	[gameWindow, gameWindowRect] = PsychImaging('OpenWindow', screenNumber, ...
-		[0 0 0], [0,0,gamewindowWidth,gamewindowHeight],[],[],[],[],[],sf);
+	PsychImaging('AddTask', 'General', 'UseFastOffscreenWindows');
+	PsychImaging('AddTask', 'General', 'UseVirtualFramebuffer');
+	%PsychImaging('AddTask', 'General', 'UseRetinaResolution');
+	%PsychImaging('AddTask', 'General', 'UsePanelFitter', [gameScreenWidth, gameScreenHeight], 'Centered');
+	[gameWindow, gameWindowRect] = PsychImaging('OpenWindow', opts.screen, ...
+		[0 0 0], [],[],[],[],[],[],sf);
+
 	opts.flipInterval = Screen('GetFlipInterval', gameWindow); 
 	opts.scale = scale;
 	opts.tileSize = tileSize;
 	opts.gameWindow = gameWindow;
 	opts.gameWindowRect = gameWindowRect;
-
+	opts.mapWidth = mapWidth;
+	opts.mapHeight = mapHeight;
+	opts.xShift = xShift;
+	opts.yShift = yShift;
+	opts.mapRect = CenterRect([0 0 mapWidth mapHeight],gameWindowRect);
 end
