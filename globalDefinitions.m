@@ -1,4 +1,3 @@
- global scale;
 
 %size of a square tile in pixels
 global tileSize;
@@ -6,8 +5,14 @@ global tileSize;
 %the center pixel of a tile
 global midTile; 
 
+% scale
+global scale;
+
+% map size
 global maxCols; maxCols = 28;
 global maxRows; maxRows = 36;
+global mapWidth; 
+global mapHeight; 
 
 %the game map
 global gameMap;
@@ -19,9 +24,8 @@ global DIR_RIGHT; DIR_RIGHT = 3;
 % global mapMargin; % margin between the map and the screen
 % global mapPad; % padding between the map and its clipping
 
-global mapWidth; 
-global mapHeight; 
-
+global mapWidth;
+global mapHeight;
 global gameScreenWidth; 
 global gameScreenHeight; 
 global gameScreenXOffset;
@@ -90,8 +94,10 @@ global totalReward;
 % % % global fruitReward; fruitReward = [100 200 300 400 500];
 global rewd
 global reward_count
+global current_round
 
 % keyboard
+KbName('UnifyKeyNames');
 global keyDown;
 global keyCode;
 global upKey;    upKey = KbName('UpArrow');
@@ -105,9 +111,6 @@ global JSdown; JSdown = 2;
 global JSleft; JSleft = 3;
 global JSright; JSright = 4;
 global JSMoved JSCode;
-
-% system
-global topPriorityLevel OldPriority;
 
 % online control 
 % global ol_info_win % online information window  -- 20170119 lzq

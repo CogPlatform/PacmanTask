@@ -1,8 +1,8 @@
 function [JSMoved, JSCode, JSVoltage, bug, keyCode] = JSCheck
 global JSup JSdown JSleft JSright up down left right; % trans_data;
 global bug;
+global upKey downKey leftKey rightKey;
 persistent JS_last_direction JS_start_time JS_duration_threshold;
-persistent ifdown ifup ifleft ifright;
 
 bug = 0;
 
@@ -13,15 +13,7 @@ if isempty(JS_last_direction)
 	JS_duration_threshold = 0.15; % threshold in seconds, adjustable
 end
 
-[a,b,c,d]=deal(0);
-JSVoltage = [a,b,c,d]; % left, down, right, up
-
-if isempty(ifdown) || isempty(ifup) || isempty(ifleft) || isempty(ifright)
-	ifdown = KbName('DownArrow');
-	ifup = KbName('UpArrow');
-	ifleft = KbName('LeftArrow');
-	ifright = KbName('RightArrow');
-end
+JSVoltage = [0,0,0,0]; % left, down, right, up
 
 % check keyboard state
 [~, tNow, keyCode] = KbCheck(-1);
@@ -33,13 +25,13 @@ end
 current_time = tNow;
 current_direction = 0;
 
-if keyCode(ifdown)
+if keyCode(downKey)
 	current_direction = 1; % down
-elseif keyCode(ifup)
+elseif keyCode(upKey)
 	current_direction = 2; % up
-elseif keyCode(ifleft)
+elseif keyCode(leftKey)
 	current_direction = 3; % left
-elseif keyCode(ifright)
+elseif keyCode(rightKey)
 	current_direction = 4; % right
 end
 

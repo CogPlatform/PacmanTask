@@ -8,10 +8,8 @@ cal = 0;
 globalDefinitions;
 global deadline;
 global data;
-global rewd;
-global idx;
+global idx; idx = 0;
 % global randomfig; % %% 0--UP  1--DOWN  2--UP&DOWN  %% only used in UpDownMap
-global JSMoved JSCode;
 global fruit_pos;
 % global GHOST_ENTERING_HOME;
 % global GHOST_GOING_HOME;
@@ -26,10 +24,9 @@ global right; right = 0;
 global bug; bug = 0;
 global ch_block;
 bugall = 0;
-idx = 0;
 
-global passtrial;  % pass current trial or not ---hy 20170328
-passtrial=0;
+
+global passtrial; passtrial=0; % pass current trial or not ---hy 20170328
 % global time_all time;
 global lj_Alpha;
 
@@ -66,7 +63,7 @@ drawCost = 0;
 flipCost = 0;
 ghostUpCost = 0;
 pacManUpCost = 0;
-Screen('DrawTexture', gameWindow, texture, [], [], [], 0);
+Screen('DrawTexture', gameWindow, texture);
 drawRewards(fruit_pos);
 if ghostNumber>0
 	for i=1:ghostNumber
@@ -78,7 +75,8 @@ if ghostNumber>0
 	end
 end
 drawPlayer;
-ifi = Screen('GetFlipInterval', gameWindow);
+ifi = flipInterval;
+halfifi = ifi/2;
 %fyh
 % setDO(4,0);
 % Marker('Water Off')
@@ -140,7 +138,7 @@ while gameMap.totalDots>0
 				ghostUpdate(i); %ypz_ghoststay
 			end
 			if isPacmanCollide()
-				Screen('DrawTexture', gameWindow, texture, [], [], [], 0);
+				Screen('DrawTexture', gameWindow, texture);
 				drawRewards(fruit_pos);
 				if ghostNumber>0
 					for i=1:ghostNumber
@@ -152,7 +150,7 @@ while gameMap.totalDots>0
 					end
 				end
 				drawPlayer;
-				[vbl,~,flip,miss] = Screen('Flip', gameWindow, vbl+(1-0.5)*ifi);
+				[vbl,~,flip,miss] = Screen('Flip', gameWindow, vbl+halfifi);
 				if pacMan.pixel.x == 337 && pacMan.pixel.y == 662
 					% Eyelink('message','Pacman no move');
 					% Marker('Pacman no move');
@@ -180,7 +178,7 @@ while gameMap.totalDots>0
 		updateEnergizer;
 		if gameMap.totalDots == endDots
 %           if ghosts(i).mode == GHOST_GOING_HOME
-			Screen('DrawTexture', gameWindow, texture, [], [], [], 0);
+			Screen('DrawTexture', gameWindow, texture);
 			drawRewards(fruit_pos);
 			if ghostNumber>0
 				for i=1:ghostNumber
@@ -192,7 +190,7 @@ while gameMap.totalDots>0
 				end
 			end
 			drawPlayer;
-			[vbl,~,flip,miss] = Screen('Flip', gameWindow, vbl+(1-0.5)*ifi);
+			[vbl,~,flip,miss] = Screen('Flip', gameWindow, vbl+halfifi);
 			% Eyelink('message','Finish trial');
 			% Marker('Finish trial');
 			break
@@ -200,7 +198,7 @@ while gameMap.totalDots>0
 		
 		
 		if idx>deadline  % if pacman do not move over 900 frames, pacman will die.
-			Screen('DrawTexture', gameWindow, texture, [], [], [], 0);
+			Screen('DrawTexture', gameWindow, texture);
 			drawRewards(fruit_pos);
 			if ghostNumber>0
 				for i=1:ghostNumber
@@ -212,7 +210,7 @@ while gameMap.totalDots>0
 				end
 			end
 			drawPlayer;
-			[vbl,~,flip,miss] = Screen('Flip', gameWindow, vbl+(1-0.5)*ifi);
+			[vbl,~,flip,miss] = Screen('Flip', gameWindow, vbl+halfifi);
 			% Eyelink('message','Pacman no move');
 			% Marker('Pacman no move');
 			rt = 1;
@@ -227,7 +225,7 @@ while gameMap.totalDots>0
 		%% key operation
 		% stop & resume operation
 		if keyCode(pauseKey)%press key's' to resume
-			[vbl,~,flip,miss] = Screen('Flip', gameWindow, vbl+(1-0.5)*ifi);
+			[vbl,~,flip,miss] = Screen('Flip', gameWindow, vbl+halfifi);
 			% Eyelink('message','Key Pause');
 			% Marker('Key Pause');
 			% setDO(4,0);
@@ -239,7 +237,7 @@ while gameMap.totalDots>0
 			dead = 1;
 			break
 		elseif keyCode(escapeKey)%esc
-			[vbl,~,flip,miss] = Screen('Flip', gameWindow, vbl+(1-0.5)*ifi);
+			[vbl,~,flip,miss] = Screen('Flip', gameWindow, vbl+halfifi);
 			keepRunning = false;
 			% Eyelink('message','Key pass');
 			% Marker('Key pass');
@@ -247,7 +245,7 @@ while gameMap.totalDots>0
 			% Marker('Water Off')
 			break
 		elseif keyCode(key_pass)  %press key 'p' to pass current trial  ---hy 20170328
-			[vbl,~,flip,miss] = Screen('Flip', gameWindow, vbl+(1-0.5)*ifi);
+			[vbl,~,flip,miss] = Screen('Flip', gameWindow, vbl+halfifi);
 			% Eyelink('message','Key pass');
 			% Marker('Key pass');
 			% setDO(4,0);
@@ -255,7 +253,7 @@ while gameMap.totalDots>0
 			passtrial=1;
 			break
 		elseif keyCode(calKey)
-			[vbl,~,flip,miss] = Screen('Flip', gameWindow, vbl+(1-0.5)*ifi);
+			[vbl,~,flip,miss] = Screen('Flip', gameWindow, vbl+halfifi);
 			% Eyelink('message','Key Pause');
 			% Marker('Key Pause');
 			% setDO(4,0);
@@ -264,7 +262,7 @@ while gameMap.totalDots>0
 			cal = 1;
 			break
 		elseif keyCode(change_block)
-			[vbl,~,flip,miss] = Screen('Flip', gameWindow, vbl+(1-0.5)*ifi);
+			[vbl,~,flip,miss] = Screen('Flip', gameWindow, vbl+halfifi);
 			% setDO(4,0);
 			ch_block = 1;
 			passtrial=1;
@@ -273,7 +271,7 @@ while gameMap.totalDots>0
 	end
 	%% draw everything
 	drawStart = GetSecs();
-	Screen('DrawTexture', gameWindow, texture, [], [], [], 0);
+	Screen('DrawTexture', gameWindow, texture);
 	drawRewards(fruit_pos);
 	if ghostNumber>0
 		for i=1:ghostNumber
@@ -292,7 +290,7 @@ while gameMap.totalDots>0
 	timestep = timestep + 1;
 	%% Flip
 	VBL = GetSecs();
-	[vbl,~,flip,miss] = Screen('Flip', gameWindow, vbl+(1-0.5)*ifi);
+	[vbl,~,flip,miss] = Screen('Flip', gameWindow, vbl+halfifi);
 %     tmp = Screen('GetImage',gameWindow);
 %     imwrite(tmp,'/home/pacman/Desktop/screenshot/test5.png')
 
@@ -325,7 +323,7 @@ while gameMap.totalDots>0
 	end
 	start = GetSecs();
 	%%
-	[JSMoved, JSCode, JSVoltage, bug, keyCode] = JSCheck;
+	[JSMoved, JSCode, JSVoltage, bug, keyCode] = JSCheck();
 	JSCheckTime = GetSecs();
 	bugall = bug + bugall;
 	%%  save data / modified by ljs 2019.11.01
@@ -339,6 +337,8 @@ timestep = timestep + 1;
 datasaving(timestep,JSVoltage,reward_round,ifi,vbl,flip,miss,fps,CodeCost, ...
 	JSCost,DSCost,rewardCost,drawCost,flipCost,ghostUpCost,pacManUpCost);
 fprintf('%d frames in total have miss or fps larger than 64\n', frame_d)
+fprintf('===>>>Last CodeCost: %.3f ms, JSCost: %.3f ms, DSCost: %.3f ms, drawCost: %.3f ms, flipCost: %.3f ms, ghostUpCost: %.3f ms, pacManUpCost: %.3f ms\n', ...
+-	CodeCost*1000, JSCost*1000, DSCost*1000, drawCost*1000, flipCost*1000, ghostUpCost*1000, pacManUpCost*1000);
 % if timestep >= 20000
 %     error('should change preallocation of data in initData')
 % end

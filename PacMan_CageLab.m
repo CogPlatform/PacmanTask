@@ -1,10 +1,8 @@
 function PacMan_CageLab(opts)
-disp(opts);
 % PACMAN_CAGELAB - Run the PacMan Cage Lab experiment, 
 % opts are the settings from the GUI
 
-	% legacy code uses globals :-( TODO - refactor away globals!
-	global mapname SubjectName Left
+	opts.version = '2026-05-29'; % for debugging, to track which version is running
 
 	%% =========================== initial config for PTB
 	PsychDefaultSetup(2);
@@ -17,7 +15,7 @@ disp(opts);
 	% opts.zmq = communicate directly to cogmoteGO, get commands from remote control PC
 
 	%% =========================== ALF file paths
-	% we use alyxManager to identify the proper save path
+	% we use alyxManager to identify the save path
 	% ALF file paths compatible with Alyx database
 	% https://int-brain-lab.github.io/ONE/alf_intro.html
 	if isfield(opts,'alyx') && isa(opts.alyx,'alyxManager'); opts.alyx.checkPaths; end
@@ -35,6 +33,7 @@ disp(opts);
 	%% =========================== Set up other paths
 	% additional paths, diary is saved to ALF path too
 	opts.rootPath = fileparts(mfilename("fullpath"));
+	addpath([opts.rootPath filesep 'vedioCode/src/rawDrawCode/draw']); % drawing functions
 	if ~isfield(opts,'mapPath') || ~exist(opts.mapPath,'dir')
 		opts.mapPath = [opts.rootPath filesep 'Maps'];
 	end
@@ -46,8 +45,9 @@ disp(opts);
 	fprintf("\n===>>> PacMan Task ALF path: %s\n",opts.alyxPath);
 
 	%% =========================== force resolution
+	if opts.screen > max(Screen('Screens')); opts.screen = max(Screen('Screens')); end
 	if opts.forceResolution
-		Screen('Resolution',opts.screen,1920,1080,60);
+		try Screen('Resolution',opts.screen,1920,1080,60); end
 		disp(Screen('Resolution',opts.screen));
 	end
 
@@ -55,6 +55,7 @@ disp(opts);
 	if opts.audio
 		%we use audio manager as it stops conflicts with PTB tasks.
 		opts.aM = audioManager('device', opts.audioDevice,...
+		'lowLatency',true,...
 		'fileName',fullfile(opts.rootPath, 'explode.mp3'),...
 		'volumeLevel', opts.audioVolume);
 		setup(opts.aM);
@@ -68,12 +69,15 @@ disp(opts);
 	else
 		opts.water = PTBSimia.pumpManager(true); % true = dummy pump
 	end
-	opts.broadcast = matmoteGO.broadcast;
-	opts.status = matmoteGO.status(); % initialize experiment status object
+	opts.broadcast = matmoteGO.broadcast(); % initialize broadcast function to send data to cogmoteGO
+	opts.status = matmoteGO.status(); % initialize cogmoteGO status updater
+	opts.tL = timeLogger('preallocateTimes',10); % initialize time logger to record timestamped messages\
+	preAllocate(opts.tL);
 	[~,hname] = system('hostname');
 	hname = strip(hname);
 	if isempty(hname); hname = 'unknown'; end
 	opts.hostname = hname;
+	addMessage(opts.tL, 0, [], [], "PacMan Task Initialized",[],"Experimental-note");
 
 	%% =========================== messaging setup
 	if ~opts.remote
@@ -89,18 +93,18 @@ disp(opts);
 	clear KbCheck; % clear any previous keyboard events
 
 	%% =========================== other initialisations
-	SubjectName = opts.session.subjectName; % comes from CageLab GUI
-	Left = 0;
 	if ~isfield(opts,'mapName') || isempty(opts.mapName)
 		opts.mapName = "GenerateRandomMap_1_oneWay_random";
 	end
 	[~,opts.mapName,~] = fileparts(opts.mapName); % remove .m
 	mapname = opts.mapName;
+	addMessage(opts.tL, 0, [], [], sprintf("Using map: %s on subject: %s", opts.mapName, opts.session.subjectName));
 	
 	%% =========================== the current main function
 	try
 		main_2025(opts);
 	catch ME
+		getReport(ME)
 		try opts.status.updateStatusToStopped(); end
 		sca;
 		rethrow(ME)
