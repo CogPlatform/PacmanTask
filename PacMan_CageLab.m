@@ -2,9 +2,10 @@ function PacMan_CageLab(opts)
 % PACMAN_CAGELAB - Run the PacMan Cage Lab experiment, 
 % opts are the settings from the GUI
 
-	opts.version = '2026-05-29'; % for debugging, to track which version is running
+	opts.version = '2026-06-04'; % for debugging, to track which version is running
 
-	%% =========================== initial config for PTB
+	%% =========================== initial config for PTB and opticka
+	addOptickaToPath(); % add opticka to path, for alyx, hardware and broadcasting
 	PsychDefaultSetup(2);
 
 	%% ==========================================
@@ -29,6 +30,7 @@ function PacMan_CageLab(opts)
 		opts.session.subjectName, opts.session.labName, true);
 	opts.dataName = [opts.alyxPath filesep 'matlab.raw.pacman.' opts.ALFName '.mat'];
 	opts.jsonName = [opts.alyxPath filesep 'opticka.details.pacman.' opts.ALFName '.json'];
+	opts.eventsName = [opts.alyxPath filesep 'events.table.' opts.ALFName '.tsv'];
 	
 	%% =========================== Set up other paths
 	% additional paths, diary is saved to ALF path too
@@ -40,7 +42,7 @@ function PacMan_CageLab(opts)
 	opts.diaryPath = [opts.alyxPath filesep '_matlab_diary.pacman.' opts.ALFName '.log'];
 	diary(opts.diaryPath);
 
-	fprintf("\n===>>> PacMan Task Starting...\n");
+	fprintf("\n===>>> PacMan %s Task Starting...\n", opts.version);
 	disp(opts);
 	fprintf("\n===>>> PacMan Task ALF path: %s\n",opts.alyxPath);
 
@@ -66,6 +68,7 @@ function PacMan_CageLab(opts)
 	end
 	if opts.reward
 		opts.water = PTBSimia.pumpManager(false); % false = real pump
+		opts.water.giveReward(10); % preload/test the pump code
 	else
 		opts.water = PTBSimia.pumpManager(true); % true = dummy pump
 	end
@@ -77,8 +80,15 @@ function PacMan_CageLab(opts)
 	hname = strip(hname);
 	if isempty(hname); hname = 'unknown'; end
 	opts.hostname = hname;
-	addMessage(opts.tL, 0, [], [], "PacMan Task Initialized",[],"Experimental-note");
-
+	addMessage(opts.tL, 0, [], [], sprintf("PacMan Task Initialized on %s", opts.hostname), "","Experimental-note");
+	addMessage(opts.tL, 0, [], [], "CageLab V" + clutil.version, "", "Version-identifier");
+	addMessage(opts.tL, 0, [], [], "Opticka V" + opts.tL.optickaVersion, "", "Version-identifier");
+	addMessage(opts.tL, 0, [], [], "PacManTask V" + opts.version, "", "Version-identifier");
+	addMessage(opts.tL, 0, [], [], string(opts.dataName), "", "Pathname");
+	addMessage(opts.tL, 0, [], [], string(opts.diaryPath), "", "Pathname");
+	addMessage(opts.tL, 0, [], [], string(opts.eventsName), "", "Pathname");
+	addMessage(opts.tL, 0, [], [], string(opts.jsonName), "", "Pathname");
+	
 	%% =========================== messaging setup
 	if ~opts.remote
 		% we don't need zmq, set to empty
@@ -98,7 +108,6 @@ function PacMan_CageLab(opts)
 	end
 	[~,opts.mapName,~] = fileparts(opts.mapName); % remove .m
 	mapname = opts.mapName;
-	addMessage(opts.tL, 0, [], [], sprintf("Using map: %s on subject: %s", opts.mapName, opts.session.subjectName));
 	
 	%% =========================== the current main function
 	try

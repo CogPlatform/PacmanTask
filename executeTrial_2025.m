@@ -82,7 +82,8 @@ halfifi = ifi/2;
 % Marker('Water Off')
 %% Flip the first frame
 [JSMoved, JSCode, JSVoltage] = JSCheck;
-[vbl,~,flip,miss] = Screen('Flip', gameWindow);
+[vbl,~,flip,miss] = Screen('Flip', gameWindow); tStart = vbl;
+addMessage(opts.tL, timestep, tStart, [], "Trial Start", "vbltime", "Experimental-note");
 %fyh
 % Eyelink('message','Trial Start');
 % Marker('Trial Start');
@@ -91,8 +92,9 @@ datasaving(timestep,JSVoltage,reward_round,ifi,vbl,flip,miss,fps,CodeCost, ...
 
 %% %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
 while gameMap.totalDots>0
+	start = GetSecs();
 	%%  give reward -fyh change to incage type
-	rewardStart = GetSecs();
+	rewardStart = start;
 	reward_count = reward_count + rewd.numdot + rewd.numgoast + rewd.numeneg;
 	reward_round = reward_round + rewd.numdot + rewd.numgoast + rewd.numeneg;
 	reward_reset;
@@ -108,7 +110,7 @@ while gameMap.totalDots>0
 		% Marker('Water Off')
 	end
 	rewardEnd = GetSecs();
-	rewardCost = GetSecs() - rewardStart;
+	rewardCost = rewardEnd - rewardStart;
 	%%
 	skip = 0;
 	if ghostNumber>0
@@ -171,8 +173,8 @@ while gameMap.totalDots>0
 		end
 		
 		%%
-		ghostUpCost = GetSecs() - rewardEnd;
 		ghostUpEnd = GetSecs();
+		ghostUpCost = ghostUpEnd - rewardEnd;
 		pacManUpdate;
 		pacManUpCost = GetSecs() - ghostUpEnd;
 		updateEnergizer;
@@ -191,6 +193,7 @@ while gameMap.totalDots>0
 			end
 			drawPlayer;
 			[vbl,~,flip,miss] = Screen('Flip', gameWindow, vbl+halfifi);
+			addMessage(opts.tL, timestep, vbl, [], "Finish: totalDots have been consumed", "vbltime", "Experimental-note");
 			% Eyelink('message','Finish trial');
 			% Marker('Finish trial');
 			break
@@ -211,6 +214,7 @@ while gameMap.totalDots>0
 			end
 			drawPlayer;
 			[vbl,~,flip,miss] = Screen('Flip', gameWindow, vbl+halfifi);
+			addMessage(opts.tL, timestep, vbl, [], sprintf("Pacman no move for %d frames, auto dead", idx), "vbltime", "Experimental-note");
 			% Eyelink('message','Pacman no move');
 			% Marker('Pacman no move');
 			rt = 1;
@@ -289,7 +293,7 @@ while gameMap.totalDots>0
 	frame = frame + 1;
 	timestep = timestep + 1;
 	%% Flip
-	VBL = GetSecs();
+	preFlip = GetSecs();
 	[vbl,~,flip,miss] = Screen('Flip', gameWindow, vbl+halfifi);
 %     tmp = Screen('GetImage',gameWindow);
 %     imwrite(tmp,'/home/pacman/Desktop/screenshot/test5.png')
@@ -309,22 +313,20 @@ while gameMap.totalDots>0
 	% end
 	
 	%% print time cost and fps
-	Flip = GetSecs();
 	if frame ~= 2
-		End_all = End_all + Flip - start;
-		fps = 1/(Flip - start);
-		CodeCost = VBL - start;
+		End_all = End_all + flip - start;
+		fps = 1/(flip - start);
+		CodeCost = preFlip - start;
 		DSCost = DataSave - JSCheckTime;
 		JSCost = JSCheckTime - start;
-		flipCost = Flip - VBL;
+		flipCost = flip - preFlip;
 		if fps < 56 || fps > 64
 			frame_d = frame_d + 1;
 		end
 	end
-	start = GetSecs();
+
 	%%
-	[JSMoved, JSCode, JSVoltage, bug, keyCode] = JSCheck();
-	JSCheckTime = GetSecs();
+	[JSMoved, JSCode, JSVoltage, bug, keyCode, JSCheckTime] = JSCheck();
 	bugall = bug + bugall;
 	%%  save data / modified by ljs 2019.11.01
 	datasaving(timestep,JSVoltage,reward_round,ifi,vbl,flip,miss,fps,CodeCost, ...
@@ -337,11 +339,14 @@ timestep = timestep + 1;
 datasaving(timestep,JSVoltage,reward_round,ifi,vbl,flip,miss,fps,CodeCost, ...
 	JSCost,DSCost,rewardCost,drawCost,flipCost,ghostUpCost,pacManUpCost);
 fprintf('%d frames in total have miss or fps larger than 64\n', frame_d)
-fprintf('===>>>Last CodeCost: %.3f ms, JSCost: %.3f ms, DSCost: %.3f ms, drawCost: %.3f ms, flipCost: %.3f ms, ghostUpCost: %.3f ms, pacManUpCost: %.3f ms\n', ...
+t = sprintf('===>>> LAST CodeCost: %.3f ms, JSCost: %.3f ms, DSCost: %.3f ms, drawCost: %.3f ms, flipCost: %.3f ms, ghostUpCost: %.3f ms, pacManUpCost: %.3f ms', ...
 -	CodeCost*1000, JSCost*1000, DSCost*1000, drawCost*1000, flipCost*1000, ghostUpCost*1000, pacManUpCost*1000);
+addMessage(opts.tL, timestep, [], [], t, "", "Experimental-note"); disp(t);
+
 % if timestep >= 20000
 %     error('should change preallocation of data in initData')
 % end
+
 if bugall
 	fprintf('%d frames in total have two directions at the same time\n', bugall)
 end

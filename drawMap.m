@@ -2,6 +2,7 @@ function mapWin = drawMap(opts)
 
 global gameMap tileSize scale mapWidth mapHeight;
 
+% use offscreen window (which is a texture) = more efficient!
 mapWin = Screen('OpenOffscreenWindow', opts.screen, 0, [ 0 0 mapWidth mapHeight]);
 
 % ghost house door

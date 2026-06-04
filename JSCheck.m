@@ -1,4 +1,4 @@
-function [JSMoved, JSCode, JSVoltage, bug, keyCode] = JSCheck
+function [JSMoved, JSCode, JSVoltage, bug, keyCode, tNow] = JSCheck
 global JSup JSdown JSleft JSright up down left right; % trans_data;
 global bug;
 global upKey downKey leftKey rightKey;

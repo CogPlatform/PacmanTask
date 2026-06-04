@@ -6,9 +6,10 @@ function opts = init_2025(opts)
 	
 	%% =========================== debug mode?
 	sf = []; windowed = [];
-	if max(Screen('Screens'))==0 && opts.debug
+	if (opts.screen==0 || max(Screen('Screens'))==0) && opts.debug
 		if IsLinux || IsOSX
-			sf = kPsychGUIWindow; windowed = [0 0 1920 1080]; 
+			sf = kPsychGUIWindow; 
+			windowed = [0 0 1920 1080]; 
 		else
 			PsychDebugWindowConfiguration; %for windows only, kPsychGUIWindow is better
 		end
@@ -17,7 +18,11 @@ function opts = init_2025(opts)
 	%% ============================ PTB setup
 	PsychDefaultSetup(2);
 	Screen('Preference', 'VisualDebugLevel', 3);
-	Screen('Preference', 'SkipSyncTests', 2);
+	if opts.disableSync
+		Screen('Preference', 'SkipSyncTests', 2);
+	else
+		Screen('Preference', 'SkipSyncTests', 0);
+	end
 	
 	% screen setup
 	[gamewindowWidth, gamewindowHeight] = Screen('WindowSize', opts.screen);
