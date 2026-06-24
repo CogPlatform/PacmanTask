@@ -2,8 +2,9 @@ function PacMan_CageLab(opts)
 % PACMAN_CAGELAB - Run the PacMan Cage Lab experiment, 
 % opts are the settings from the GUI
 
-	opts.version = '2026-06-04'; % for debugging, to track which version is running
-
+	opts.version = '2026-06-11'; % for debugging, to track which version is running
+	opts.cagelab-version = clutil.version; % for debugging, to track which version of CageLab is running
+	
 	%% =========================== initial config for PTB and opticka
 	addOptickaToPath(); % add opticka to path, for alyx, hardware and broadcasting
 	PsychDefaultSetup(2);
@@ -80,6 +81,7 @@ function PacMan_CageLab(opts)
 	hname = strip(hname);
 	if isempty(hname); hname = 'unknown'; end
 	opts.hostname = hname;
+	opts.opticka-version = opts.tL.optickaVersion;
 	addMessage(opts.tL, 0, [], [], sprintf("PacMan Task Initialized on %s", opts.hostname), "","Experimental-note");
 	addMessage(opts.tL, 0, [], [], "CageLab V" + clutil.version, "", "Version-identifier");
 	addMessage(opts.tL, 0, [], [], "Opticka V" + opts.tL.optickaVersion, "", "Version-identifier");
