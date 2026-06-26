@@ -279,7 +279,7 @@ while result >=0  % quit session when result<0
 	%% ================================== check if a command was sent from control system
 	[opts, keepRunning] = clutil.checkMessages(opts);
 
-	if ~keepRunning || used_trial > opts.totalRewards
+	if ~keepRunning || used_trial > opts.totalTrials
 		result = -1; % set result to -2 to end session
 	end
 
