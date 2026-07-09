@@ -2,7 +2,7 @@ function PacMan_CageLab(opts)
 % PACMAN_CAGELAB - Run the PacMan Cage Lab experiment, 
 % opts are the settings from the GUI
 
-	opts.version = '2026-06-26'; % for debugging, to track which version is running
+	opts.version = '2026-07-05'; % for debugging, to track which version is running
 	opts.cagelab_version = clutil.version; % for debugging, to track which version of CageLab is running
 	
 	%% =========================== initial config for PTB and opticka

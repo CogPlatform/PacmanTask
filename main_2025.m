@@ -302,6 +302,8 @@ save(opts.dataName, 'allGamesData', 'opts', '-v7.3');
 fprintf('#####################\n≣≣≣≣ <strong>SAVED RAW DATA to: %s</strong>\n#####################\n', opts.dataName)
 
 % JSON from opts
+close(opts.aM); % close audio manager
+
 alyx = opts.alyx; zmq = opts.zmq; opts.alyx = []; opts.zmq = [];
 tL = opts.tL; opts.tL = []; % remove tL from opts to avoid saving large data
 opts.broadcast = [];
